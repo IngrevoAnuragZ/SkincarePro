@@ -6,7 +6,7 @@ import ProgressSteps from '../components/common/ProgressSteps';
 import QuestionCard, { AnswerType } from '../components/assessment/QuestionCard';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
-import { SkincareRecommendationEngine } from '../lib/recommendationEngine';
+import { DynamicSkincareRecommendationEngine } from '../lib/dynamicRecommendationEngine';
 
 type Question = {
   id: string;
@@ -315,7 +315,7 @@ const questions: Question[] = [
         id: 'hot_humid', 
         text: 'Hot and Humid',
         value: 'hot_humid',
-        description: 'e.g., Mumbai, Chennai, Kolkata'
+        description: 'e.g., Mumbai, Chennai, Kolkata, Hyderabad'
       },
       { 
         id: 'hot_dry', 
@@ -350,7 +350,7 @@ const questions: Question[] = [
     type: 'single',
     answers: [
       { 
-        id: 'budget', 
+        id: 'budget-friendly', 
         text: 'Budget-Friendly (₹500 or less)',
         value: 'budget',
         description: 'Affordable drugstore and local brands'
@@ -499,10 +499,13 @@ const AssessmentPage: React.FC = () => {
           skin_sensitivity: assessmentData.skinSensitivity || 3,
           medical_conditions: Array.isArray(assessmentData.medicalConditions) ? assessmentData.medicalConditions : [],
           other_medical_condition: assessmentData.otherConditions || null,
+          current_medications: assessmentData.currentMedications || null,
           age_range: assessmentData.ageRange,
           gender: assessmentData.gender,
           climate: assessmentData.climate,
           lifestyle_factors: [assessmentData.lifestyle],
+          current_products: assessmentData.currentProducts || {},
+          routine_frequency: assessmentData.routineFrequency || null,
           budget_range: assessmentData.budget,
           primary_goals: Array.isArray(assessmentData.primaryGoals) ? assessmentData.primaryGoals : [],
           ingredient_preferences: [],
@@ -527,7 +530,7 @@ const AssessmentPage: React.FC = () => {
 
   const generateRecommendations = async (assessmentData: any) => {
     try {
-      const engine = new SkincareRecommendationEngine();
+      const engine = new DynamicSkincareRecommendationEngine();
       
       const engineData = {
         skinType: assessmentData.skinType,

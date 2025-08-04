@@ -332,9 +332,30 @@ export const productsService = {
 export const assessmentService = {
   async save(assessment: UserAssessment) {
     try {
+      // Save to skin_assessments table instead
       const { data, error } = await supabase
-        .from('user_assessments')
-        .insert(assessment)
+        .from('skin_assessments')
+        .insert({
+          user_id: assessment.user_id,
+          skin_type: assessment.skin_type,
+          skin_concerns: assessment.skin_concerns || [],
+          skin_sensitivity: assessment.skin_sensitivity || 3,
+          medical_conditions: assessment.medical_conditions || [],
+          other_medical_condition: assessment.other_medical_condition,
+          current_medications: assessment.current_medications,
+          age_range: assessment.age_range,
+          gender: assessment.gender,
+          climate: assessment.climate,
+          lifestyle_factors: assessment.lifestyle_factors || [],
+          current_products: assessment.current_products || {},
+          routine_frequency: assessment.routine_frequency,
+          budget_range: assessment.budget_range,
+          primary_goals: assessment.primary_goals || [],
+          ingredient_preferences: assessment.ingredient_preferences || [],
+          ingredient_allergies: assessment.ingredient_allergies || [],
+          assessment_score: assessment.assessment_score,
+          completed_at: new Date().toISOString()
+        })
         .select()
         .single()
       
@@ -349,10 +370,10 @@ export const assessmentService = {
   async getByUserId(userId: string) {
     try {
       const { data, error } = await supabase
-        .from('user_assessments')
+        .from('skin_assessments')
         .select('*')
         .eq('user_id', userId)
-        .order('assessment_date', { ascending: false })
+        .order('completed_at', { ascending: false })
       
       if (error) throw error
       return data as UserAssessment[]

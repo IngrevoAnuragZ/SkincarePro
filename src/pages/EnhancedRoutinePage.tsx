@@ -1,56 +1,71 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Sun, Sunset, Moon, Download, Info, Calendar as CalendarIcon } from 'lucide-react';
+import { Sun, Sunset, Moon, Download, Info, Calendar as CalendarIcon, ShoppingBag, Star } from 'lucide-react';
 import Button from '../components/common/Button';
 import RoutineCard from '../components/routine/RoutineCard';
 import CalendarIntegration from '../components/calendar/CalendarIntegration';
 import { useAuth } from '../hooks/useAuth';
+import { DynamicSkincareRecommendationEngine } from '../lib/dynamicRecommendationEngine';
 
-// Enhanced routine data with afternoon routines
-const morningRoutine = {
+// Enhanced routine data with product recommendations
+const sampleMorningRoutine = {
   id: 'm1',
-  title: 'Daily Brightening Routine',
+  title: 'Budget-Friendly Morning Routine',
   time: 'morning' as const,
   steps: [
     {
       id: 'm1s1',
-      productName: 'Gentle Foaming Cleanser',
+      productName: 'Simple Refreshing Facial Wash',
+      brand: 'Simple',
+      price: 199,
       productType: 'Cleanser',
       timing: '30 seconds',
-      description: 'Start your day with a gentle cleanser to remove impurities without stripping your skin.'
+      description: 'Start your day with a gentle cleanser to remove impurities without stripping your skin.',
+      benefits: ['No artificial perfumes', 'Vitamin B5', 'Triple purified water']
     },
     {
       id: 'm1s2',
-      productName: 'Vitamin C Serum',
+      productName: 'Minimalist Niacinamide 10%',
+      brand: 'Minimalist',
+      price: 349,
       productType: 'Treatment',
       timing: 'Wait 2 minutes',
-      description: 'Apply vitamin C serum to brighten skin and protect against environmental damage.'
+      description: 'Controls oil production and reduces inflammation for clearer skin.',
+      benefits: ['Controls oil production', 'Minimizes pore appearance', 'Reduces inflammation']
     },
     {
       id: 'm1s3',
-      productName: 'Hydrating Gel Moisturizer',
+      productName: 'Pond\'s Super Light Gel',
+      brand: 'Pond\'s',
+      price: 199,
       productType: 'Moisturizer',
       timing: 'Wait 1 minute',
-      description: 'Lock in hydration with a lightweight gel moisturizer suitable for Indian climate.'
+      description: 'Lock in hydration with a lightweight gel moisturizer suitable for Indian climate.',
+      benefits: ['Non-greasy formula', 'Quick absorption', 'Hyaluronic acid']
     },
     {
       id: 'm1s4',
-      productName: 'Mineral Sunscreen SPF 50',
+      productName: 'Neutrogena Ultra Sheer Sunscreen SPF 50+',
+      brand: 'Neutrogena',
+      price: 449,
       productType: 'Sun Protection',
       timing: 'Apply generously',
-      description: 'Finish with broad-spectrum sunscreen to protect from harmful UV rays.'
+      description: 'Finish with broad-spectrum sunscreen to protect from harmful UV rays.',
+      benefits: ['Dry-touch technology', 'Lightweight', 'Non-comedogenic']
     }
   ]
 };
 
-const afternoonRoutine = {
+const sampleAfternoonRoutine = {
   id: 'a1',
   title: 'Midday Refresh & Protection',
   time: 'afternoon' as const,
   steps: [
     {
       id: 'a1s1',
-      productName: 'Antioxidant Face Mist',
+      productName: 'Hydrating Face Mist',
+      brand: 'Generic',
+      price: 299,
       productType: 'Refresher',
       timing: 'As needed',
       description: 'Refresh and hydrate skin while providing antioxidant protection.'
@@ -58,6 +73,8 @@ const afternoonRoutine = {
     {
       id: 'a1s2',
       productName: 'Sunscreen Reapplication',
+      brand: 'Neutrogena',
+      price: 449,
       productType: 'Sun Protection',
       timing: 'Every 2-3 hours',
       description: 'Reapply sunscreen for continued protection, especially if outdoors.'
@@ -65,6 +82,8 @@ const afternoonRoutine = {
     {
       id: 'a1s3',
       productName: 'Blotting Papers (if needed)',
+      brand: 'Generic',
+      price: 99,
       productType: 'Oil Control',
       timing: 'As needed',
       description: 'Gently blot excess oil without disturbing makeup or skincare.'
@@ -72,38 +91,48 @@ const afternoonRoutine = {
   ]
 };
 
-const eveningRoutine = {
+const sampleEveningRoutine = {
   id: 'e1',
-  title: 'Hyperpigmentation Repair',
+  title: 'Budget Evening Repair Routine',
   time: 'evening' as const,
   steps: [
     {
       id: 'e1s1',
-      productName: 'Micellar Water',
+      productName: 'Simple Micellar Water',
+      brand: 'Simple',
+      price: 299,
       productType: 'Makeup Remover',
       timing: '1 minute',
       description: 'Remove makeup and surface impurities gently.'
     },
     {
       id: 'e1s2',
-      productName: 'Nourishing Facial Cleanser',
+      productName: 'Simple Refreshing Facial Wash',
+      brand: 'Simple',
+      price: 199,
       productType: 'Cleanser',
       timing: '30 seconds',
       description: 'Deeply cleanse skin without disrupting its natural balance.'
     },
     {
       id: 'e1s3',
-      productName: 'Alpha Arbutin + Niacinamide Serum',
+      productName: 'The Ordinary Hyaluronic Acid 2% + B5',
+      brand: 'The Ordinary',
+      price: 490,
       productType: 'Treatment',
       timing: 'Wait 3 minutes',
-      description: 'Target hyperpigmentation and even skin tone with this powerful combination.'
+      description: 'Intense hydration and moisture retention for plumper skin.',
+      benefits: ['Intense hydration', 'Plumps fine lines', 'Suitable for all skin types']
     },
     {
       id: 'e1s4',
-      productName: 'Peptide Moisturizer',
+      productName: 'Nivea Soft Light Moisturizer',
+      brand: 'Nivea',
+      price: 149,
       productType: 'Moisturizer',
       timing: 'Final step',
-      description: 'Restore and repair skin overnight with peptides and ceramides.'
+      description: 'Restore and repair skin overnight with gentle hydration.',
+      benefits: ['24-hour hydration', 'Vitamin E', 'Jojoba oil']
     }
   ]
 };
@@ -111,12 +140,20 @@ const eveningRoutine = {
 const EnhancedRoutinePage: React.FC = () => {
   const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>({});
   const [showCalendarIntegration, setShowCalendarIntegration] = useState(false);
+  const [routines, setRoutines] = useState([sampleMorningRoutine, sampleAfternoonRoutine, sampleEveningRoutine]);
+  const [totalBudget, setTotalBudget] = useState(0);
   const { user } = useAuth();
 
   // Mock assessment ID - in real app, this would come from the user's latest assessment
   const mockAssessmentId = 1;
 
-  const routines = [morningRoutine, afternoonRoutine, eveningRoutine];
+  useEffect(() => {
+    // Calculate total budget from all routines
+    const total = routines.reduce((sum, routine) => {
+      return sum + routine.steps.reduce((stepSum, step) => stepSum + (step.price || 0), 0);
+    }, 0);
+    setTotalBudget(total);
+  }, [routines]);
 
   const toggleStepCompletion = (stepId: string) => {
     setCompletedSteps(prev => ({
@@ -130,25 +167,29 @@ const EnhancedRoutinePage: React.FC = () => {
 INGREVO PERSONALIZED SKINCARE ROUTINE
 
 MORNING ROUTINE:
-${morningRoutine.steps.map((step, index) => 
-  `${index + 1}. ${step.productName} (${step.productType})
+${routines[0].steps.map((step, index) => 
+  `${index + 1}. ${step.productName} - ${step.brand} (₹${step.price})
      Timing: ${step.timing}
-     ${step.description}`
+     ${step.description}
+     Benefits: ${step.benefits?.join(', ') || 'General skincare benefits'}`
 ).join('\n\n')}
 
 AFTERNOON ROUTINE:
-${afternoonRoutine.steps.map((step, index) => 
-  `${index + 1}. ${step.productName} (${step.productType})
+${routines[1].steps.map((step, index) => 
+  `${index + 1}. ${step.productName} - ${step.brand} (₹${step.price})
      Timing: ${step.timing}
      ${step.description}`
 ).join('\n\n')}
 
 EVENING ROUTINE:
-${eveningRoutine.steps.map((step, index) => 
-  `${index + 1}. ${step.productName} (${step.productType})
+${routines[2].steps.map((step, index) => 
+  `${index + 1}. ${step.productName} - ${step.brand} (₹${step.price})
      Timing: ${step.timing}
-     ${step.description}`
+     ${step.description}
+     Benefits: ${step.benefits?.join(', ') || 'General skincare benefits'}`
 ).join('\n\n')}
+
+TOTAL BUDGET: ₹${totalBudget}
 
 Generated by Ingrevo - Your AI Skincare Assistant
 Visit: https://ingrevoskin.netlify.app
@@ -179,6 +220,12 @@ Visit: https://ingrevoskin.netlify.app
             <div className="ml-3">
               <h3 className="text-xl font-semibold">{routine.title}</h3>
               <p className="text-sm text-neutral-500 capitalize">{routine.time} Routine</p>
+              <div className="flex items-center mt-1">
+                <ShoppingBag size={14} className="text-primary-500 mr-1" />
+                <span className="text-sm font-medium text-primary-600">
+                  ₹{routine.steps.reduce((sum: number, step: any) => sum + (step.price || 0), 0)}
+                </span>
+              </div>
             </div>
           </div>
           <div className="text-sm text-neutral-500">
@@ -231,6 +278,10 @@ Visit: https://ingrevoskin.netlify.app
                       {step.productName}
                     </h4>
                     <div className="flex items-center text-sm text-neutral-500">
+                      <div className="flex items-center space-x-2 mt-1">
+                        <span className="text-xs text-neutral-500">{step.brand}</span>
+                        <span className="text-xs font-medium text-primary-600">₹{step.price}</span>
+                      </div>
                       <span className="mr-1">⏱️</span>
                       {step.timing}
                     </div>
@@ -240,6 +291,23 @@ Visit: https://ingrevoskin.netlify.app
                   <p className={`text-sm ${completedSteps[step.id] ? 'text-neutral-400' : 'text-neutral-600'}`}>
                     {step.description}
                   </p>
+                  
+                  {step.benefits && (
+                    <div className="mt-2">
+                      <div className="flex flex-wrap gap-1">
+                        {step.benefits.slice(0, 2).map((benefit: string, idx: number) => (
+                          <span key={idx} className="inline-block text-xs bg-success-100 text-success-700 rounded-full px-2 py-1">
+                            {benefit}
+                          </span>
+                        ))}
+                        {step.benefits.length > 2 && (
+                          <span className="inline-block text-xs bg-neutral-100 text-neutral-600 rounded-full px-2 py-1">
+                            +{step.benefits.length - 2} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -323,11 +391,37 @@ Visit: https://ingrevoskin.netlify.app
                   <li>📅 Add routines to Google Calendar with automatic reminders</li>
                   <li>🌤️ Afternoon routine adjusts based on your work environment</li>
                   <li>📄 Export your routine to share with dermatologists</li>
+                  <li>💰 Budget-friendly product recommendations with pricing</li>
+                  <li>🏷️ Real product names, brands, and benefits included</li>
                 </ul>
               </div>
             </div>
           </motion.div>
 
+          {/* Budget Summary */}
+          <motion.div 
+            className="bg-gradient-to-r from-success-50 to-success-100 rounded-xl p-6 mb-10 border border-success-200"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.25 }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="h-10 w-10 rounded-full bg-success-200 flex items-center justify-center mr-4">
+                  <ShoppingBag size={20} className="text-success-700" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-success-800">Complete Routine Budget</h3>
+                  <p className="text-success-600">All products for your personalized routine</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-success-700">₹{totalBudget}</div>
+                <div className="text-sm text-success-600">Total Investment</div>
+                <div className="text-xs text-success-500">~₹{Math.round(totalBudget/3)}/month</div>
+              </div>
+            </div>
+          </motion.div>
           {/* Interactive Routines */}
           <div className="grid lg:grid-cols-2 gap-8 mb-12">
             {/* Morning Routine */}
@@ -341,7 +435,7 @@ Visit: https://ingrevoskin.netlify.app
                 <Sun size={24} className="text-warning-500 mr-2" />
                 <h2 className="text-xl font-bold">Morning Routine</h2>
               </motion.div>
-              {renderInteractiveRoutine(morningRoutine, 
+              {renderInteractiveRoutine(routines[0], 
                 <div className="h-12 w-12 rounded-full bg-warning-100 flex items-center justify-center">
                   <Sun size={24} className="text-warning-600" />
                 </div>
@@ -359,7 +453,7 @@ Visit: https://ingrevoskin.netlify.app
                 <Sunset size={24} className="text-accent-500 mr-2" />
                 <h2 className="text-xl font-bold">Afternoon Refresh</h2>
               </motion.div>
-              {renderInteractiveRoutine(afternoonRoutine,
+              {renderInteractiveRoutine(routines[1],
                 <div className="h-12 w-12 rounded-full bg-accent-100 flex items-center justify-center">
                   <Sunset size={24} className="text-accent-600" />
                 </div>
@@ -379,7 +473,7 @@ Visit: https://ingrevoskin.netlify.app
               <h2 className="text-xl font-bold">Evening Routine</h2>
             </motion.div>
             <div className="max-w-4xl mx-auto">
-              {renderInteractiveRoutine(eveningRoutine,
+              {renderInteractiveRoutine(routines[2],
                 <div className="h-12 w-12 rounded-full bg-primary-100 flex items-center justify-center">
                   <Moon size={24} className="text-primary-600" />
                 </div>
@@ -394,10 +488,30 @@ Visit: https://ingrevoskin.netlify.app
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
           >
-            <h2 className="text-2xl font-bold mb-4">Ready to Get Started?</h2>
-            <p className="text-lg mb-6 opacity-90">
-              Take our comprehensive skin assessment to get personalized routines and Google Calendar integration
-            </p>
+            <div className="text-center">
+              <h2 className="text-2xl font-bold mb-4">Ready to Get Your Personalized Routine?</h2>
+              <p className="text-lg mb-6 opacity-90">
+                Take our comprehensive skin assessment to get budget-specific routines with real product recommendations
+              </p>
+              
+              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 mb-6">
+                <div className="flex items-center justify-center space-x-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">₹500</div>
+                    <div className="text-sm opacity-90">Budget Option</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">₹1500</div>
+                    <div className="text-sm opacity-90">Mid-Range</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">₹3000+</div>
+                    <div className="text-sm opacity-90">Premium</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button
                 variant="outline"

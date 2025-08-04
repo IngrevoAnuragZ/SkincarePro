@@ -261,7 +261,7 @@ const Hero: React.FC = () => {
               >
                 <div className="flex items-center space-x-3">
                   <div className="w-3 h-3 rounded-full bg-success-500"></div>
-                  <p className="text-sm font-medium text-neutral-800">Natural Ingredients</p>
+                  <p className="text-sm font-medium text-neutral-800">Budget Under ₹500</p>
                 </div>
               </motion.div>
               
@@ -273,7 +273,7 @@ const Hero: React.FC = () => {
               >
                 <div className="flex items-center space-x-3">
                   <div className="w-3 h-3 rounded-full bg-primary-500"></div>
-                  <p className="text-sm font-medium text-neutral-800">Dermatologist Approved</p>
+                  <p className="text-sm font-medium text-neutral-800">Real Product Recommendations</p>
                 </div>
               </motion.div>
             </motion.div>

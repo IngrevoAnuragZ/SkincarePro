@@ -335,6 +335,12 @@ export const productsService = {
 export const assessmentService = {
   async save(assessment: UserAssessment) {
     try {
+      // Check if we have valid Supabase credentials
+      if (supabaseUrl === 'https://demo.supabase.co' || supabaseAnonKey === 'demo-anon-key') {
+        console.log('Assessment service not available in demo mode')
+        return assessment
+      }
+      
       // Save to skin_assessments table instead
       const { data, error } = await supabase
         .from('skin_assessments')
@@ -372,6 +378,12 @@ export const assessmentService = {
 
   async getByUserId(userId: string) {
     try {
+      // Check if we have valid Supabase credentials
+      if (supabaseUrl === 'https://demo.supabase.co' || supabaseAnonKey === 'demo-anon-key') {
+        console.log('Assessment service not available in demo mode')
+        return []
+      }
+      
       const { data, error } = await supabase
         .from('skin_assessments')
         .select('*')

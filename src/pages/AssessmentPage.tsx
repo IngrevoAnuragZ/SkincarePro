@@ -1104,7 +1104,7 @@ const AssessmentPage: React.FC = () => {
               >
                 Create Account
               </motion.button>
-            </motion.div>
+                  {answers.medicalConditions.filter((condition: any) => typeof condition === 'string' && condition.length > 0).map((condition: string) => (
           )}
         </div>
       </motion.div>

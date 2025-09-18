@@ -315,7 +315,7 @@ const questions: Question[] = [
         id: 'hot_humid', 
         text: 'Hot and Humid',
         value: 'hot_humid',
-        description: 'e.g., Mumbai, Chennai, Kolkata, Hyderabad'
+        description: 'e.g., Mumbai, Chennai, Kolkata, Hyderabad, Bangalore'
       },
       { 
         id: 'hot_dry', 
@@ -829,10 +829,7 @@ const AssessmentPage: React.FC = () => {
             >
               <h3 className="text-lg font-semibold mb-4 text-accent-800">Top Concerns</h3>
               <div className="flex flex-wrap gap-2">
-                {Array.isArray(answers.skinConcerns) && answers.skinConcerns
-                  .filter((concern: any) => typeof concern === 'string' && concern.length > 0)
-                  .slice(0, 4)
-                  .map((concern: string) => (
+                {Array.isArray(answers.skinConcerns) && answers.skinConcerns.slice(0, 4).map((concern: string) => (
                   <span 
                     key={concern}
                     className="inline-block bg-white rounded-full px-3 py-1 text-xs font-medium text-accent-700 border border-accent-200"

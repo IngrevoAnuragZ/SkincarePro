@@ -335,12 +335,6 @@ export const productsService = {
 export const assessmentService = {
   async save(assessment: UserAssessment) {
     try {
-      // Check if we have valid Supabase credentials
-      if (supabaseUrl === 'https://demo.supabase.co' || supabaseAnonKey === 'demo-anon-key') {
-        console.log('Assessment service not available in demo mode')
-        return assessment
-      }
-      
       // Save to skin_assessments table instead
       const { data, error } = await supabase
         .from('skin_assessments')
@@ -378,12 +372,6 @@ export const assessmentService = {
 
   async getByUserId(userId: string) {
     try {
-      // Check if we have valid Supabase credentials
-      if (supabaseUrl === 'https://demo.supabase.co' || supabaseAnonKey === 'demo-anon-key') {
-        console.log('Assessment service not available in demo mode')
-        return []
-      }
-      
       const { data, error } = await supabase
         .from('skin_assessments')
         .select('*')
@@ -477,6 +465,12 @@ export const recommendationsService = {
 export const calendarService = {
   async save(integration: CalendarIntegration) {
     try {
+      // Check if we have valid Supabase credentials
+      if (supabaseUrl === 'https://demo.supabase.co' || supabaseAnonKey === 'demo-anon-key') {
+        console.log('Calendar service not available in demo mode')
+        return integration
+      }
+      
       const { data, error } = await supabase
         .from('calendar_integrations')
         .insert(integration)
@@ -493,6 +487,12 @@ export const calendarService = {
 
   async getByUserId(userId: string) {
     try {
+      // Check if we have valid Supabase credentials
+      if (supabaseUrl === 'https://demo.supabase.co' || supabaseAnonKey === 'demo-anon-key') {
+        console.log('Calendar service not available in demo mode')
+        return []
+      }
+      
       const { data, error } = await supabase
         .from('calendar_integrations')
         .select('*')
@@ -510,6 +510,12 @@ export const calendarService = {
 
   async update(integrationId: number, updates: Partial<CalendarIntegration>) {
     try {
+      // Check if we have valid Supabase credentials
+      if (supabaseUrl === 'https://demo.supabase.co' || supabaseAnonKey === 'demo-anon-key') {
+        console.log('Calendar service not available in demo mode')
+        return { integration_id: integrationId, ...updates } as CalendarIntegration
+      }
+      
       const { data, error } = await supabase
         .from('calendar_integrations')
         .update(updates)

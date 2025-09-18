@@ -1,11 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 
-// For demo purposes, we'll use placeholder values
-// In production, these should be real Supabase credentials
+// Use environment variables with fallback for demo
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://demo.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'demo-key'
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'demo-anon-key'
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: false
+  }
+})
 
 // Types for our database tables
 export interface Ingredient {

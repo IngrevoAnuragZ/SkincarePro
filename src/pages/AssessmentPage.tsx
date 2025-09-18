@@ -9,7 +9,7 @@ import CollaborativeFiltering from '../components/ml/CollaborativeFiltering';
 import SeasonalAdaptation from '../components/ml/SeasonalAdaptation';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
-import { DynamicSkincareRecommendationEngine } from '../lib/dynamicRecommendationEngine';
+import DynamicSkincareRecommendationEngine from '../lib/dynamicRecommendationEngine';
 
 // Import existing questions from the original assessment
 const questions = [

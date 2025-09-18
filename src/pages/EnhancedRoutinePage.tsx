@@ -5,7 +5,7 @@ import Button from '../components/common/Button';
 import RoutineCard from '../components/routine/RoutineCard';
 import CalendarIntegration from '../components/calendar/CalendarIntegration';
 import { useAuth } from '../hooks/useAuth';
-import { DynamicSkincareRecommendationEngine } from '../lib/dynamicRecommendationEngine';
+import DynamicSkincareRecommendationEngine from '../lib/dynamicRecommendationEngine';
 
 // Enhanced routine data with product recommendations
 const sampleMorningRoutine = {

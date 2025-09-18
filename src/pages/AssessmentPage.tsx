@@ -67,10 +67,10 @@ const questions = [
   {
     id: 'climate',
     text: 'What climate do you live in?',
-    description: 'This helps us recommend products suitable for your environment.',
+    description: 'This helps us recommend products suitable for your environment. Hyderabad is classified as Hot and Humid.',
     type: 'single' as const,
     answers: [
-      { id: 'hot_humid', text: 'Hot and Humid', value: 'hot_humid', description: 'Cities like Mumbai, Chennai, Hyderabad' },
+      { id: 'hot_humid', text: 'Hot and Humid', value: 'hot_humid', description: 'Cities like Mumbai, Chennai, Hyderabad, Kolkata' },
       { id: 'hot_dry', text: 'Hot and Dry', value: 'hot_dry', description: 'Cities like Delhi, Jaipur' },
       { id: 'moderate', text: 'Moderate', value: 'moderate', description: 'Cities like Bangalore, Pune' },
       { id: 'cold', text: 'Cold', value: 'cold', description: 'Hill stations and northern regions' }
@@ -82,10 +82,10 @@ const questions = [
     description: 'This helps us recommend products within your price range.',
     type: 'single' as const,
     answers: [
-      { id: 'budget', text: 'Budget-Friendly', value: 'budget-friendly', description: 'Under ₹500 per product' },
-      { id: 'mid', text: 'Mid-Range', value: 'mid-range', description: '₹500 - ₹1500 per product' },
-      { id: 'premium', text: 'Premium', value: 'premium', description: '₹1500 - ₹3000 per product' },
-      { id: 'luxury', text: 'Luxury', value: 'luxury', description: 'Above ₹3000 per product' }
+      { id: 'budget', text: 'Budget-Friendly', value: 'budget-friendly', description: 'Under ₹500 per product - Great for students and beginners' },
+      { id: 'mid', text: 'Mid-Range', value: 'mid-range', description: '₹500 - ₹1500 per product - Balanced quality and pricing' },
+      { id: 'premium', text: 'Premium', value: 'premium', description: '₹1500 - ₹3000 per product - High-quality formulations' },
+      { id: 'luxury', text: 'Luxury', value: 'luxury', description: 'Above ₹3000 per product - Top-tier brands and ingredients' }
     ]
   },
   {

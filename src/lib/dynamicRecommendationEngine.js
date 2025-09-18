@@ -1,7 +1,7 @@
 // 🧠 DYNAMIC SKINCARE RECOMMENDATION ALGORITHM V2.0
 // Enhanced with real product database, dynamic pricing, and comprehensive testing
 
-export class DynamicSkincareRecommendationEngine {
+class DynamicSkincareRecommendationEngine {
   constructor() {
     this.productDatabase = this.initializeProductDatabase();
     this.ruleMatrix = this.initializeRuleMatrix();
@@ -14,53 +14,44 @@ export class DynamicSkincareRecommendationEngine {
   // ============ MAIN RECOMMENDATION FUNCTION ============
   async generateRecommendations(userId, assessmentData) {
     try {
-      console.log('🔄 Starting recommendation generation for user:', userId);
+      // Ensure userId is a string
+      const safeUserId = this.safeString(userId) || 'anonymous_user';
       
       // Step 1: Validate and normalize input
       const normalizedData = this.validateAndNormalizeInput(assessmentData);
-      console.log('✅ Input validated:', normalizedData);
       
       // Step 2: Create comprehensive user profile
       const userProfile = this.createUserProfile(normalizedData);
-      console.log('✅ User profile created:', userProfile);
       
       // Step 3: Generate base recommendations using dynamic rule matrix
       const baseRecommendations = this.generateBaseRecommendations(userProfile);
-      console.log('✅ Base recommendations generated:', baseRecommendations.length);
       
       // Step 4: Apply strict budget filtering
       const budgetFilteredRecs = this.applyBudgetFiltering(baseRecommendations, userProfile);
-      console.log('✅ Budget filtering applied:', budgetFilteredRecs.length);
       
       // Step 5: Apply medical condition constraints
       const medicallyFilteredRecs = this.applyMedicalConstraints(budgetFilteredRecs, userProfile);
-      console.log('✅ Medical constraints applied:', medicallyFilteredRecs.length);
       
       // Step 6: Apply conflict resolution
       const conflictResolvedRecs = this.resolveIngredientConflicts(medicallyFilteredRecs);
-      console.log('✅ Conflicts resolved:', conflictResolvedRecs.length);
       
       // Step 7: Score and rank recommendations dynamically
       const scoredRecommendations = this.scoreAndRankRecommendations(conflictResolvedRecs, userProfile);
-      console.log('✅ Recommendations scored and ranked');
       
       // Step 8: Personalize based on experience level and preferences
       const personalizedRecs = this.personalizeRecommendations(scoredRecommendations, userProfile);
-      console.log('✅ Personalization applied');
       
       // Step 9: Structure final output with detailed benefits
       const finalRecommendations = this.structureRecommendations(personalizedRecs, userProfile);
-      console.log('✅ Recommendations structured');
       
       // Step 10: Add comprehensive routine, warnings, and benefits
       const completeResponse = this.addRoutineWarningsAndBenefits(finalRecommendations, userProfile);
-      console.log('✅ Complete response generated');
       
-      return completeResponse;
+      return this.sanitizeResponse(completeResponse);
       
     } catch (error) {
-      console.error('❌ Recommendation generation failed:', error);
-      return this.generateFallbackRecommendations(assessmentData);
+      console.error('Recommendation generation failed:', error);
+      return this.generateFallbackRecommendations(assessmentData || {});
     }
   }
 
@@ -73,7 +64,7 @@ export class DynamicSkincareRecommendationEngine {
         category: 'cleanser',
         price: 299,
         suitableFor: ['sensitive', 'dry', 'normal'],
-        addresses: ['basic_cleansing', 'sensitivity'],
+        addresses: ['basic_cleansing', 'sensitivity_redness'],
         strength: 'gentle',
         brand: 'Cetaphil',
         size: '125ml',
@@ -96,8 +87,8 @@ export class DynamicSkincareRecommendationEngine {
         name: 'Neutrogena Oil-Free Acne Wash',
         category: 'cleanser',
         price: 399,
-        suitableFor: ['oily', 'combination'],
-        addresses: ['acne', 'oiliness'],
+        suitableFor: ['oily', 'combination', 'acne_prone'],
+        addresses: ['acne_breakouts', 'excess_oil_shine'],
         strength: 'moderate',
         brand: 'Neutrogena',
         size: '175ml',
@@ -112,13 +103,25 @@ export class DynamicSkincareRecommendationEngine {
         category: 'cleanser',
         price: 990,
         suitableFor: ['normal', 'oily', 'combination'],
-        addresses: ['basic_cleansing', 'oiliness'],
+        addresses: ['basic_cleansing', 'excess_oil_shine'],
         strength: 'gentle',
         brand: 'CeraVe',
         size: '236ml',
         conflicts: [],
         activeIngredients: ['ceramides', 'hyaluronic_acid'],
         benefits: ['Ceramides restore barrier', 'Hyaluronic acid hydrates', 'Non-comedogenic']
+      },
+      'paula_choice_cleanser': {
+        name: 'Paula\'s Choice CALM Cleanser',
+        category: 'cleanser',
+        price: 1299,
+        suitableFor: ['sensitive', 'dry', 'rosacea'],
+        addresses: ['sensitivity_redness', 'basic_cleansing'],
+        strength: 'gentle',
+        brand: 'Paula\'s Choice',
+        size: '198ml',
+        conflicts: [],
+        benefits: ['Calms irritation', 'Fragrance-free', 'Plant-based ingredients']
       },
 
       // BUDGET ACTIVES (Under ₹500)
@@ -127,7 +130,7 @@ export class DynamicSkincareRecommendationEngine {
         category: 'active',
         price: 349,
         suitableFor: ['all'],
-        addresses: ['oiliness', 'pores', 'acne'],
+        addresses: ['excess_oil_shine', 'large_pores', 'acne_breakouts'],
         strength: 'moderate',
         brand: 'Minimalist',
         size: '30ml',
@@ -141,7 +144,7 @@ export class DynamicSkincareRecommendationEngine {
         category: 'hydrating',
         price: 490,
         suitableFor: ['all'],
-        addresses: ['dryness', 'aging'],
+        addresses: ['dryness_dehydration', 'fine_lines_wrinkles'],
         strength: 'gentle',
         brand: 'The Ordinary',
         size: '30ml',
@@ -156,8 +159,8 @@ export class DynamicSkincareRecommendationEngine {
         name: 'Paula\'s Choice 2% BHA Liquid',
         category: 'active',
         price: 1299,
-        suitableFor: ['oily', 'combination'],
-        addresses: ['acne', 'pores', 'texture'],
+        suitableFor: ['oily', 'combination', 'acne_prone'],
+        addresses: ['acne_breakouts', 'large_pores', 'uneven_texture'],
         strength: 'moderate',
         brand: 'Paula\'s Choice',
         size: '30ml',
@@ -171,7 +174,7 @@ export class DynamicSkincareRecommendationEngine {
         category: 'active',
         price: 899,
         suitableFor: ['normal', 'dry', 'oily'],
-        addresses: ['hyperpigmentation', 'aging'],
+        addresses: ['dark_spots_hyperpigmentation', 'fine_lines_wrinkles'],
         strength: 'strong',
         brand: 'COSRX',
         size: '20ml',
@@ -179,6 +182,37 @@ export class DynamicSkincareRecommendationEngine {
         activeIngredients: ['vitamin_c'],
         requiresExperience: 'intermediate',
         benefits: ['Brightens skin tone', 'Fades dark spots', 'Antioxidant protection']
+      },
+
+      // PREMIUM ACTIVES (₹1500-3000)
+      'skinceuticals_retinol': {
+        name: 'SkinCeuticals Retinol 0.5',
+        category: 'active',
+        price: 2800,
+        suitableFor: ['normal', 'oily', 'combination'],
+        addresses: ['fine_lines_wrinkles', 'acne_breakouts', 'uneven_texture'],
+        strength: 'strong',
+        brand: 'SkinCeuticals',
+        size: '30ml',
+        conflicts: ['vitamin_c', 'bha'],
+        activeIngredients: ['retinol'],
+        requiresExperience: 'advanced',
+        contraindications: ['pregnancy', 'nursing'],
+        benefits: ['Stimulates collagen', 'Reduces fine lines', 'Improves texture']
+      },
+      'drunk_elephant_vitamin_c': {
+        name: 'Drunk Elephant C-Firma Day Serum',
+        category: 'active',
+        price: 2499,
+        suitableFor: ['normal', 'dry', 'oily'],
+        addresses: ['dark_spots_hyperpigmentation', 'fine_lines_wrinkles'],
+        strength: 'strong',
+        brand: 'Drunk Elephant',
+        size: '30ml',
+        conflicts: ['retinoids'],
+        activeIngredients: ['vitamin_c'],
+        requiresExperience: 'intermediate',
+        benefits: ['15% L-Ascorbic Acid', 'Firms skin', 'Brightens complexion']
       },
 
       // BUDGET MOISTURIZERS (Under ₹500)
@@ -199,7 +233,7 @@ export class DynamicSkincareRecommendationEngine {
         category: 'moisturizer',
         price: 149,
         suitableFor: ['dry', 'normal'],
-        addresses: ['dryness'],
+        addresses: ['dryness_dehydration'],
         strength: 'gentle',
         brand: 'Nivea',
         size: '50ml',
@@ -213,7 +247,7 @@ export class DynamicSkincareRecommendationEngine {
         category: 'moisturizer',
         price: 799,
         suitableFor: ['normal', 'dry', 'sensitive'],
-        addresses: ['dryness', 'sensitivity'],
+        addresses: ['dryness_dehydration', 'sensitivity_redness'],
         strength: 'gentle',
         brand: 'CeraVe',
         size: '88ml',
@@ -226,7 +260,7 @@ export class DynamicSkincareRecommendationEngine {
         category: 'moisturizer',
         price: 699,
         suitableFor: ['oily', 'combination', 'normal'],
-        addresses: ['dryness'],
+        addresses: ['dryness_dehydration'],
         strength: 'gentle',
         brand: 'Neutrogena',
         size: '50g',
@@ -241,7 +275,7 @@ export class DynamicSkincareRecommendationEngine {
         category: 'sunscreen',
         price: 299,
         suitableFor: ['normal', 'oily', 'combination'],
-        addresses: ['sun_damage'],
+        addresses: ['sun_protection'],
         strength: 'moderate',
         brand: 'Lakme',
         size: '50ml',
@@ -254,7 +288,7 @@ export class DynamicSkincareRecommendationEngine {
         category: 'sunscreen',
         price: 449,
         suitableFor: ['all'],
-        addresses: ['sun_damage'],
+        addresses: ['sun_protection'],
         strength: 'gentle',
         brand: 'Neutrogena',
         size: '30ml',
@@ -270,7 +304,7 @@ export class DynamicSkincareRecommendationEngine {
         category: 'sunscreen',
         price: 899,
         suitableFor: ['sensitive', 'all'],
-        addresses: ['sun_damage'],
+        addresses: ['sun_protection'],
         strength: 'gentle',
         brand: 'La Roche-Posay',
         size: '50ml',
@@ -278,6 +312,20 @@ export class DynamicSkincareRecommendationEngine {
         spf: 50,
         essential: true,
         benefits: ['Photostable filters', 'Water resistant', 'Antioxidants']
+      },
+      'eltamd_sunscreen': {
+        name: 'EltaMD UV Clear Broad-Spectrum SPF 46',
+        category: 'sunscreen',
+        price: 1299,
+        suitableFor: ['sensitive', 'acne_prone', 'rosacea'],
+        addresses: ['sun_protection', 'sensitivity_redness'],
+        strength: 'gentle',
+        brand: 'EltaMD',
+        size: '48g',
+        conflicts: [],
+        spf: 46,
+        activeIngredients: ['zinc_oxide', 'niacinamide'],
+        benefits: ['Zinc oxide protection', 'Niacinamide calms', 'Fragrance-free']
       }
     };
   }
@@ -336,8 +384,8 @@ export class DynamicSkincareRecommendationEngine {
           '3-6 months': ['Significant reduction in acne', 'Improved skin barrier', 'Better makeup application'],
           '6-12 months': ['Stable oil control', 'Minimized scarring', 'Overall skin health improvement']
         },
-        expectedChanges: 'Your skin will gradually produce less excess oil while maintaining healthy hydration levels.',
-        maintenanceRoutine: 'Continue with oil-balancing ingredients like niacinamide and gentle BHA exfoliation.'
+        expectedChanges: 'Your skin will gradually produce less excess oil while maintaining healthy hydration levels. Pores will appear smaller and breakouts will become less frequent.',
+        maintenanceRoutine: 'Continue with oil-balancing ingredients like niacinamide and gentle BHA exfoliation 2-3 times per week.'
       },
       'dry': {
         shortTerm: {
@@ -346,37 +394,37 @@ export class DynamicSkincareRecommendationEngine {
           '8-12 weeks': ['Restored skin barrier', 'Plumper skin', 'Healthy glow']
         },
         longTerm: {
-          '3-6 months': ['Significantly improved moisture retention', 'Stronger skin barrier'],
+          '3-6 months': ['Significantly improved moisture retention', 'Stronger skin barrier', 'Reduced sensitivity'],
           '6-12 months': ['Optimal hydration balance', 'Improved resilience', 'Youthful appearance']
         },
-        expectedChanges: 'Your skin will develop better moisture retention capabilities.',
-        maintenanceRoutine: 'Layer hydrating ingredients and use rich moisturizers.'
+        expectedChanges: 'Your skin will develop better moisture retention capabilities. The barrier will strengthen, leading to less water loss and improved comfort.',
+        maintenanceRoutine: 'Layer hydrating ingredients and use rich moisturizers. Consider adding facial oils in winter months.'
       },
       'combination': {
         shortTerm: {
           '1-2 weeks': ['Balanced T-zone oil', 'Improved cheek hydration'],
-          '4-6 weeks': ['More even skin texture', 'Reduced pore visibility'],
+          '4-6 weeks': ['More even skin texture', 'Reduced pore visibility in T-zone'],
           '8-12 weeks': ['Harmonized skin zones', 'Overall improved balance']
         },
         longTerm: {
           '3-6 months': ['Stable skin balance across face', 'Improved overall texture'],
           '6-12 months': ['Optimized skin function', 'Reduced contrast between face zones']
         },
-        expectedChanges: 'Your T-zone will become less oily while cheeks maintain proper hydration.',
-        maintenanceRoutine: 'Use targeted treatments - lighter products on T-zone, richer on cheeks.'
+        expectedChanges: 'Your T-zone will become less oily while your cheeks maintain proper hydration. The contrast between different areas of your face will diminish.',
+        maintenanceRoutine: 'Use targeted treatments - lighter products on T-zone, richer on cheeks. Multi-masking can be beneficial.'
       },
       'sensitive': {
         shortTerm: {
           '1-2 weeks': ['Reduced redness', 'Less irritation', 'Calmer skin'],
           '4-6 weeks': ['Improved tolerance', 'Stronger barrier', 'Less reactivity'],
-          '8-12 weeks': ['Increased resilience', 'Better product tolerance']
+          '8-12 weeks': ['Increased resilience', 'Better product tolerance', 'Healthier appearance']
         },
         longTerm: {
-          '3-6 months': ['Significantly reduced sensitivity', 'Improved skin defense'],
-          '6-12 months': ['Optimized barrier function', 'Minimal reactivity']
+          '3-6 months': ['Significantly reduced sensitivity', 'Improved skin defense', 'Better environmental tolerance'],
+          '6-12 months': ['Optimized barrier function', 'Minimal reactivity', 'Stable skin condition']
         },
-        expectedChanges: 'Your skin will develop better tolerance to environmental factors.',
-        maintenanceRoutine: 'Continue with gentle, fragrance-free products.'
+        expectedChanges: 'Your skin will develop better tolerance to environmental factors and skincare products. Redness and irritation will significantly decrease.',
+        maintenanceRoutine: 'Continue with gentle, fragrance-free products. Introduce new ingredients very slowly and always patch test.'
       },
       'normal': {
         shortTerm: {
@@ -388,8 +436,8 @@ export class DynamicSkincareRecommendationEngine {
           '3-6 months': ['Maintained youthful appearance', 'Prevented premature aging'],
           '6-12 months': ['Optimal skin health', 'Enhanced natural beauty']
         },
-        expectedChanges: 'Your skin will maintain its healthy state while gaining protection.',
-        maintenanceRoutine: 'Focus on prevention with antioxidants and sunscreen.'
+        expectedChanges: 'Your skin will maintain its healthy state while gaining additional protection against environmental damage and aging.',
+        maintenanceRoutine: 'Focus on prevention with antioxidants and sunscreen. Gradually introduce anti-aging ingredients as you age.'
       }
     };
   }
@@ -397,7 +445,7 @@ export class DynamicSkincareRecommendationEngine {
   // ============ STRICT BUDGET FILTERING ============
   applyBudgetFiltering(recommendations, userProfile) {
     const budgetLimits = {
-      'budget': 500,
+      'budget-friendly': 500,
       'mid-range': 1500,
       'premium': 3000,
       'luxury': 10000
@@ -431,6 +479,8 @@ export class DynamicSkincareRecommendationEngine {
             budgetAlternative: true,
             originalProduct: rec.productId
           });
+        } else {
+          console.log(`💸 No budget alternative found for ${product.name} (₹${product.price})`);
         }
       }
     });
@@ -450,7 +500,12 @@ export class DynamicSkincareRecommendationEngine {
         product.price <= maxBudget &&
         id !== originalRec.productId
       )
-      .sort((a, b) => b[1].price - a[1].price); // Sort by price descending
+      .sort((a, b) => {
+        // Sort by compatibility with original product's benefits
+        const aCompatibility = this.calculateAlternativeCompatibility(a[1], originalProduct);
+        const bCompatibility = this.calculateAlternativeCompatibility(b[1], originalProduct);
+        return bCompatibility - aCompatibility;
+      });
 
     if (alternatives.length === 0) return null;
 
@@ -464,6 +519,29 @@ export class DynamicSkincareRecommendationEngine {
     };
   }
 
+  calculateAlternativeCompatibility(alternative, original) {
+    let compatibility = 0;
+    
+    // Same suitable skin types
+    const commonSkinTypes = alternative.suitableFor.filter(type => 
+      original.suitableFor.includes(type)
+    ).length;
+    compatibility += commonSkinTypes * 10;
+    
+    // Same concerns addressed
+    const commonConcerns = alternative.addresses.filter(concern => 
+      original.addresses.includes(concern)
+    ).length;
+    compatibility += commonConcerns * 15;
+    
+    // Same strength level
+    if (alternative.strength === original.strength) {
+      compatibility += 20;
+    }
+    
+    return compatibility;
+  }
+
   // ============ ENHANCED BASE RECOMMENDATIONS ============
   generateBaseRecommendations(userProfile) {
     console.log('🔍 Generating base recommendations for profile:', userProfile);
@@ -473,11 +551,17 @@ export class DynamicSkincareRecommendationEngine {
     // 1. Essential products (always include)
     recommendations.push(...this.getEssentialProducts(userProfile));
     
-    // 2. Climate-specific products
+    // 2. Climate-specific products (NEW)
     recommendations.push(...this.getClimateSpecificProducts(userProfile));
     
-    // 3. Concern-based products with priority
+    // 3. Skin type specific products
+    recommendations.push(...this.getSkinTypeProducts(userProfile));
+    
+    // 4. Concern-based products with priority
     recommendations.push(...this.getConcernBasedProducts(userProfile));
+    
+    // 5. Age-appropriate products
+    recommendations.push(...this.getAgeBasedProducts(userProfile));
     
     console.log(`✅ Generated ${recommendations.length} base recommendations`);
     return this.deduplicateRecommendations(recommendations);
@@ -507,6 +591,7 @@ export class DynamicSkincareRecommendationEngine {
   findProductsByIngredient(ingredient, userProfile) {
     return Object.entries(this.productDatabase)
       .filter(([id, product]) => {
+        // Check if product contains the ingredient or addresses related concerns
         const hasIngredient = product.activeIngredients?.includes(ingredient);
         const addressesConcern = this.getIngredientConcerns(ingredient).some(concern =>
           product.addresses.includes(concern)
@@ -517,244 +602,21 @@ export class DynamicSkincareRecommendationEngine {
         return (hasIngredient || addressesConcern) && suitableForSkinType;
       })
       .map(([id]) => id)
-      .slice(0, 2);
+      .slice(0, 2); // Limit to top 2 products per ingredient
   }
 
   getIngredientConcerns(ingredient) {
     const concernMap = {
-      'salicylic_acid': ['acne', 'pores', 'oiliness'],
-      'niacinamide': ['oiliness', 'pores', 'sensitivity'],
-      'hyaluronic_acid': ['dryness', 'aging'],
-      'vitamin_c': ['hyperpigmentation', 'aging'],
-      'retinol': ['aging', 'acne', 'texture'],
-      'zinc_oxide': ['sun_damage', 'sensitivity'],
-      'ceramides': ['dryness', 'sensitivity']
+      'salicylic_acid': ['acne_breakouts', 'large_pores', 'excess_oil_shine'],
+      'niacinamide': ['excess_oil_shine', 'large_pores', 'sensitivity_redness'],
+      'hyaluronic_acid': ['dryness_dehydration', 'fine_lines_wrinkles'],
+      'vitamin_c': ['dark_spots_hyperpigmentation', 'fine_lines_wrinkles'],
+      'retinol': ['fine_lines_wrinkles', 'acne_breakouts', 'uneven_texture'],
+      'zinc_oxide': ['sun_protection', 'sensitivity_redness'],
+      'ceramides': ['dryness_dehydration', 'sensitivity_redness']
     };
     
     return concernMap[ingredient] || [];
-  }
-
-  // ============ ESSENTIAL PRODUCTS GENERATION ============
-  getEssentialProducts(userProfile) {
-    const essentials = [];
-    
-    // Cleanser selection based on skin type and budget
-    const cleanserOptions = this.getCleanserOptions(userProfile);
-    if (cleanserOptions.length > 0) {
-      essentials.push({
-        productId: cleanserOptions[0],
-        reasoning: 'Essential daily cleanser for healthy skin maintenance',
-        category: 'essential',
-        priority: 100
-      });
-    }
-
-    // Moisturizer selection
-    const moisturizerOptions = this.getMoisturizerOptions(userProfile);
-    if (moisturizerOptions.length > 0) {
-      essentials.push({
-        productId: moisturizerOptions[0],
-        reasoning: 'Daily moisturizer for hydration and barrier protection',
-        category: 'essential',
-        priority: 95
-      });
-    }
-
-    // Sunscreen selection
-    const sunscreenOptions = this.getSunscreenOptions(userProfile);
-    if (sunscreenOptions.length > 0) {
-      essentials.push({
-        productId: sunscreenOptions[0],
-        reasoning: 'Daily sun protection to prevent aging and damage',
-        category: 'essential',
-        priority: 100
-      });
-    }
-
-    return essentials;
-  }
-
-  getCleanserOptions(userProfile) {
-    const budgetLimits = {
-      'budget': 500,
-      'mid-range': 1500,
-      'premium': 3000,
-      'luxury': 10000
-    };
-    const maxBudget = budgetLimits[userProfile.budget] || 500;
-
-    const cleanserPriority = [];
-
-    // Budget-friendly options
-    if (maxBudget >= 199) {
-      if (userProfile.skinType === 'sensitive' || userProfile.sensitivity > 7) {
-        cleanserPriority.push('cetaphil_gentle_cleanser', 'simple_refreshing_cleanser');
-      } else if (userProfile.skinType === 'oily' || userProfile.concerns.includes('acne')) {
-        cleanserPriority.push('neutrogena_oil_free_cleanser');
-      } else {
-        cleanserPriority.push('simple_refreshing_cleanser', 'cetaphil_gentle_cleanser');
-      }
-    }
-
-    // Mid-range options
-    if (maxBudget >= 990) {
-      cleanserPriority.unshift('cerave_foaming_cleanser');
-    }
-
-    return cleanserPriority.filter(id => {
-      const product = this.productDatabase[id];
-      return product && product.price <= maxBudget;
-    });
-  }
-
-  getMoisturizerOptions(userProfile) {
-    const budgetLimits = {
-      'budget': 500,
-      'mid-range': 1500,
-      'premium': 3000,
-      'luxury': 10000
-    };
-    const maxBudget = budgetLimits[userProfile.budget] || 500;
-
-    const moisturizerPriority = [];
-
-    // Budget-friendly options
-    if (maxBudget >= 149) {
-      if (userProfile.skinType === 'dry' || userProfile.climate === 'cold') {
-        moisturizerPriority.push('nivea_soft_cream');
-      } else {
-        moisturizerPriority.push('ponds_super_light_gel');
-      }
-    }
-
-    // Mid-range options
-    if (maxBudget >= 699) {
-      if (userProfile.skinType === 'oily' || userProfile.climate === 'hot_humid') {
-        moisturizerPriority.unshift('neutrogena_hydra_boost');
-      } else {
-        moisturizerPriority.unshift('cerave_daily_moisturizer');
-      }
-    }
-
-    return moisturizerPriority.filter(id => {
-      const product = this.productDatabase[id];
-      return product && product.price <= maxBudget;
-    });
-  }
-
-  getSunscreenOptions(userProfile) {
-    const budgetLimits = {
-      'budget': 500,
-      'mid-range': 1500,
-      'premium': 3000,
-      'luxury': 10000
-    };
-    const maxBudget = budgetLimits[userProfile.budget] || 500;
-
-    const sunscreenPriority = [];
-
-    // Budget-friendly options
-    if (maxBudget >= 299) {
-      sunscreenPriority.push('lakme_sunscreen');
-      if (maxBudget >= 449) {
-        sunscreenPriority.unshift('neutrogena_ultra_sheer');
-      }
-    }
-
-    // Mid-range options
-    if (maxBudget >= 899) {
-      sunscreenPriority.unshift('la_roche_posay_sunscreen');
-    }
-
-    return sunscreenPriority.filter(id => {
-      const product = this.productDatabase[id];
-      return product && product.price <= maxBudget;
-    });
-  }
-
-  // ============ CONCERN-BASED PRODUCTS ============
-  getConcernBasedProducts(userProfile) {
-    const concernProducts = [];
-    const budgetLimits = {
-      'budget': 500,
-      'mid-range': 1500,
-      'premium': 3000,
-      'luxury': 10000
-    };
-    const maxBudget = budgetLimits[userProfile.budget] || 500;
-    
-    userProfile.concerns.forEach((concern, index) => {
-      const priority = 90 - (index * 10);
-      
-      switch(concern) {
-        case 'acne':
-          if (maxBudget >= 349) {
-            concernProducts.push({
-              productId: 'minimalist_niacinamide',
-              reasoning: 'Controls oil production and reduces acne inflammation',
-              category: 'targeted',
-              priority: priority
-            });
-          }
-          
-          if (userProfile.experience !== 'beginner' && maxBudget >= 1299) {
-            concernProducts.push({
-              productId: 'paula_choice_bha',
-              reasoning: 'Unclogs pores and prevents new breakouts',
-              category: 'targeted',
-              priority: priority - 5
-            });
-          }
-          break;
-          
-        case 'aging':
-          if (maxBudget >= 899) {
-            concernProducts.push({
-              productId: 'cosrx_vitamin_c',
-              reasoning: 'Antioxidant protection and collagen support',
-              category: 'targeted',
-              priority: priority
-            });
-          }
-          break;
-          
-        case 'hyperpigmentation':
-          if (maxBudget >= 899) {
-            concernProducts.push({
-              productId: 'cosrx_vitamin_c',
-              reasoning: 'Brightens skin tone and fades dark spots',
-              category: 'targeted',
-              priority: priority
-            });
-          }
-          break;
-          
-        case 'dryness':
-          if (maxBudget >= 490) {
-            concernProducts.push({
-              productId: 'the_ordinary_hyaluronic_acid',
-              reasoning: 'Intense hydration and moisture retention',
-              category: 'targeted',
-              priority: priority
-            });
-          }
-          break;
-          
-        case 'oiliness':
-        case 'pores':
-          if (maxBudget >= 349) {
-            concernProducts.push({
-              productId: 'minimalist_niacinamide',
-              reasoning: 'Controls sebum production and minimizes pore appearance',
-              category: 'targeted',
-              priority: priority
-            });
-          }
-          break;
-      }
-    });
-
-    return concernProducts;
   }
 
   // ============ ENHANCED ROUTINE GENERATION ============
@@ -772,7 +634,8 @@ export class DynamicSkincareRecommendationEngine {
       warnings: warnings,
       expected_benefits: benefits,
       timeline: timeline,
-      budget_summary: this.generateBudgetSummary(recommendations)
+      budget_summary: this.generateBudgetSummary(recommendations),
+      extend_button_data: this.generateExtendButtonData(userProfile, benefits)
     };
   }
 
@@ -804,17 +667,17 @@ export class DynamicSkincareRecommendationEngine {
         if (!product) return;
 
         const routineItem = {
-          product_id: rec.productId,
-          product_name: product.name,
-          brand: product.brand,
-          price: product.price,
-          step: step,
-          instructions: this.getDetailedUsageInstructions(rec.productId, userProfile),
-          why_recommended: rec.reasoning,
-          key_benefits: product.benefits,
-          wait_time: this.getWaitTime(product),
-          application_amount: this.getApplicationAmount(product),
-          frequency: this.getFrequency(rec.productId, userProfile)
+          product_id: this.safeString(rec.productId),
+          product_name: this.safeString(product.name || 'Unknown Product'),
+          brand: this.safeString(product.brand || 'Unknown Brand'),
+          price: parseInt(product.price) || 0,
+          step: this.safeString(step),
+          instructions: this.safeString(this.getDetailedUsageInstructions(rec.productId, userProfile)),
+          why_recommended: this.safeString(rec.reasoning || 'Recommended for your skin type'),
+          key_benefits: this.safeArray(product.benefits || []),
+          wait_time: this.safeString(this.getWaitTime(product)),
+          application_amount: this.safeString(this.getApplicationAmount(product)),
+          frequency: this.safeString(this.getFrequency(rec.productId, userProfile))
         };
 
         // Add to appropriate routine(s)
@@ -828,7 +691,8 @@ export class DynamicSkincareRecommendationEngine {
         
         // Handle specific timing for actives
         if (timing === 'specific') {
-          if (['vitamin_c'].some(ingredient => product.activeIngredients?.includes(ingredient))) {
+          const activeIngredients = this.safeArray(product.activeIngredients || []);
+          if (activeIngredients.includes('vitamin_c')) {
             morningRoutine.push({ ...routineItem, routine_time: 'morning' });
           } else {
             eveningRoutine.push({ ...routineItem, routine_time: 'evening' });
@@ -839,12 +703,17 @@ export class DynamicSkincareRecommendationEngine {
 
     return {
       morning: morningRoutine.sort((a, b) => this.getRoutineOrder(a.step) - this.getRoutineOrder(b.step)),
-      evening: eveningRoutine.sort((a, b) => this.getRoutineOrder(a.step) - this.getRoutineOrder(b.step))
+      evening: eveningRoutine.sort((a, b) => this.getRoutineOrder(a.step) - this.getRoutineOrder(b.step)),
+      weekly_treatments: this.getWeeklyTreatments(allProducts, userProfile),
+      routine_tips: this.getRoutineTips(userProfile)
     };
   }
 
   getDetailedUsageInstructions(productId, userProfile) {
-    const instructions = {
+    const product = this.productDatabase[productId];
+    if (!product) return 'Follow product instructions';
+
+    const baseInstructions = {
       'cetaphil_gentle_cleanser': 'Apply to damp skin, massage gently for 30 seconds, rinse with lukewarm water',
       'simple_refreshing_cleanser': 'Use morning and evening on wet face, massage gently, rinse thoroughly',
       'neutrogena_oil_free_cleanser': 'Apply to wet skin, work into lather avoiding eye area, rinse completely',
@@ -856,17 +725,22 @@ export class DynamicSkincareRecommendationEngine {
       'ponds_super_light_gel': 'Apply small amount to face and neck, massage until absorbed',
       'cerave_daily_moisturizer': 'Apply liberally to face and neck while skin is still slightly damp',
       'neutrogena_ultra_sheer': 'Apply generously 15 minutes before sun exposure, reapply every 2 hours',
-      'la_roche_posay_sunscreen': 'Use as final morning step, apply evenly, don\'t forget neck and ears'
+      'la_roche_posay_sunscreen': 'Use as final morning step, apply evenly, do not forget neck and ears'
     };
 
-    let instruction = instructions[productId] || 'Follow product instructions carefully';
+    let instructions = this.safeString(baseInstructions[productId] || 'Follow product instructions carefully');
 
     // Add experience-based modifications
-    if (userProfile.experience === 'beginner' && this.productDatabase[productId]?.category === 'active') {
-      instruction += '. Start with once per week and gradually increase frequency as tolerated.';
+    if (userProfile.experience === 'beginner' && product.category === 'active') {
+      instructions += '. Start with once per week and gradually increase frequency as tolerated.';
     }
 
-    return instruction;
+    // Add sensitivity modifications
+    if (userProfile.sensitivity > 7 && product.strength !== 'gentle') {
+      instructions += '. Patch test first and start with minimal amount.';
+    }
+
+    return instructions;
   }
 
   getWaitTime(product) {
@@ -926,6 +800,258 @@ export class DynamicSkincareRecommendationEngine {
     return order[step] || 6;
   }
 
+  getWeeklyTreatments(allProducts, userProfile) {
+    const treatments = [];
+    
+    // Add exfoliation recommendation
+    if (userProfile.skinType === 'oily' || userProfile.concerns.includes('acne_breakouts')) {
+      treatments.push({
+        treatment: 'Gentle exfoliation',
+        frequency: '1-2 times per week',
+        description: 'Use a gentle BHA product for deeper pore cleansing',
+        timing: 'Evening',
+        replace_step: 'Skip other actives on exfoliation nights'
+      });
+    }
+    
+    // Add mask recommendations
+    if (userProfile.concerns.includes('dryness_dehydration')) {
+      treatments.push({
+        treatment: 'Hydrating mask',
+        frequency: 'Once per week',
+        description: 'Use a sheet mask or hydrating treatment mask',
+        timing: 'Evening after cleansing',
+        duration: '15-20 minutes'
+      });
+    }
+
+    return treatments;
+  }
+
+  getRoutineTips(userProfile) {
+    const tips = [
+      '💧 Always apply products to slightly damp skin for better absorption',
+      '⏰ Allow each product to absorb before applying the next',
+      '🧪 Introduce new products one at a time to monitor reactions',
+      '☀️ Never skip sunscreen, even on cloudy days'
+    ];
+
+    // Add experience-specific tips
+    if (userProfile.experience === 'beginner') {
+      tips.push('🐌 Start slowly with active ingredients - your skin needs time to adjust');
+      tips.push('📝 Keep a skincare diary to track what works for you');
+    }
+
+    // Add climate-specific tips
+    if (userProfile.climate === 'hot_humid') {
+      tips.push('🌡️ In humid weather, use lighter formulations and wait longer between steps');
+      tips.push('💨 Consider using a fan while applying products to help absorption');
+    }
+
+    // Add skin type tips
+    if (userProfile.skinType === 'sensitive') {
+      tips.push('🧾 Always patch test new products on your inner arm first');
+      tips.push('🌡️ Use lukewarm water instead of hot when cleansing');
+    }
+
+    return tips;
+  }
+
+  // ============ DETAILED BENEFITS GENERATION ============
+  generatePersonalizedBenefits(recommendations, userProfile) {
+    const skinTypeBenefits = this.benefitsDatabase[userProfile.skinType];
+    const allProducts = Object.keys(recommendations).reduce((acc, category) => {
+      return acc.concat(recommendations[category]);
+    }, []);
+
+    // Calculate combined benefits from all recommended products
+    const combinedBenefits = this.calculateCombinedBenefits(allProducts, userProfile);
+
+    return {
+      skin_type_benefits: skinTypeBenefits,
+      product_specific_benefits: this.getProductSpecificBenefits(allProducts),
+      synergistic_effects: combinedBenefits.synergisticEffects,
+      timeline_benefits: this.createBenefitsTimeline(allProducts, userProfile),
+      before_after_expectations: this.generateBeforeAfterExpectations(userProfile),
+      maintenance_benefits: combinedBenefits.maintenanceBenefits
+    };
+  }
+
+  calculateCombinedBenefits(products, userProfile) {
+    const activeIngredients = [];
+    const addressedConcerns = new Set();
+    
+    products.forEach(rec => {
+      const product = this.productDatabase[rec.productId];
+      if (product) {
+        if (product.activeIngredients) {
+          activeIngredients.push(...product.activeIngredients);
+        }
+        product.addresses.forEach(concern => addressedConcerns.add(concern));
+      }
+    });
+
+    const synergisticEffects = this.calculateSynergisticEffects(activeIngredients);
+    const maintenanceBenefits = this.calculateMaintenanceBenefits(addressedConcerns, userProfile);
+
+    return { synergisticEffects, maintenanceBenefits };
+  }
+
+  calculateSynergisticEffects(ingredients) {
+    const synergies = {
+      'niacinamide + hyaluronic_acid': 'Enhanced hydration with oil control - perfect balance for all skin types',
+      'vitamin_c + niacinamide': 'Powerful antioxidant protection with brightening effects (when used properly)',
+      'retinol + hyaluronic_acid': 'Anti-aging benefits with minimized irritation and enhanced hydration',
+      'ceramides + hyaluronic_acid': 'Superior barrier repair and long-lasting hydration',
+      'salicylic_acid + niacinamide': 'Deep pore cleansing with anti-inflammatory benefits'
+    };
+
+    const foundSynergies = [];
+    Object.keys(synergies).forEach(combo => {
+      const [ing1, ing2] = combo.split(' + ');
+      if (ingredients.includes(ing1) && ingredients.includes(ing2)) {
+        foundSynergies.push({
+          combination: combo,
+          effect: synergies[combo],
+          strength: 'Strong'
+        });
+      }
+    });
+
+    return foundSynergies;
+  }
+
+  calculateMaintenanceBenefits(addressedConcerns, userProfile) {
+    const benefits = [];
+    
+    addressedConcerns.forEach(concern => {
+      const maintenanceMap = {
+        'acne_breakouts': 'Ongoing acne prevention and reduced scarring risk',
+        'fine_lines_wrinkles': 'Continued collagen stimulation and aging prevention',
+        'dark_spots_hyperpigmentation': 'Even skin tone maintenance and new spot prevention',
+        'excess_oil_shine': 'Balanced sebum production and improved skin texture',
+        'dryness_dehydration': 'Optimal hydration levels and strengthened skin barrier',
+        'sensitivity_redness': 'Improved skin tolerance and reduced reactivity',
+        'large_pores': 'Minimized pore appearance and refined skin texture'
+      };
+
+      if (maintenanceMap[concern]) {
+        benefits.push({
+          concern: concern,
+          maintenance_benefit: maintenanceMap[concern],
+          importance: 'High'
+        });
+      }
+    });
+
+    return benefits;
+  }
+
+  getProductSpecificBenefits(products) {
+    return products.map(rec => {
+      const product = this.productDatabase[rec.productId];
+      if (!product) return null;
+
+      return {
+        product_name: product.name,
+        brand: product.brand,
+        key_benefits: product.benefits,
+        expected_results: this.getExpectedResults(product),
+        timeline: this.getProductTimeline(product)
+      };
+    }).filter(Boolean);
+  }
+
+  getExpectedResults(product) {
+    const resultMap = {
+      'cleanser': 'Clean, refreshed skin without tightness or irritation',
+      'active': 'Gradual improvement in targeted concerns with consistent use',
+      'hydrating': 'Plumper, more hydrated skin with improved texture',
+      'moisturizer': 'Soft, comfortable skin with strengthened barrier',
+      'sunscreen': 'Protection from UV damage and premature aging prevention'
+    };
+
+    return resultMap[product.category] || 'Improved skin health and appearance';
+  }
+
+  getProductTimeline(product) {
+    const timelineMap = {
+      'cleanser': 'Immediate comfort, long-term skin health',
+      'active': '4-12 weeks for visible results, 3-6 months for optimal benefits',
+      'hydrating': '1-2 weeks for improved hydration, ongoing maintenance',
+      'moisturizer': 'Immediate comfort, 2-4 weeks for barrier improvement',
+      'sunscreen': 'Immediate protection, lifelong aging prevention'
+    };
+
+    return timelineMap[product.category] || '4-8 weeks for noticeable improvement';
+  }
+
+  createBenefitsTimeline(products, userProfile) {
+    const timeline = {
+      'Week 1-2': [],
+      'Week 3-4': [],
+      'Month 2-3': [],
+      'Month 4-6': [],
+      'Month 6+': []
+    };
+
+    // Immediate benefits (Week 1-2)
+    timeline['Week 1-2'].push('Improved cleansing and hydration');
+    timeline['Week 1-2'].push('Sun protection established');
+    if (userProfile.skinType === 'dry') {
+      timeline['Week 1-2'].push('Reduced skin tightness and flaking');
+    }
+
+    // Early benefits (Week 3-4)
+    timeline['Week 3-4'].push('Skin begins to adjust to new routine');
+    timeline['Week 3-4'].push('Initial improvement in texture');
+    if (userProfile.concerns.includes('acne_breakouts')) {
+      timeline['Week 3-4'].push('Possible initial breakout as skin purges');
+    }
+
+    // Medium-term benefits (Month 2-3)
+    timeline['Month 2-3'].push('Significant improvement in primary concerns');
+    timeline['Month 2-3'].push('Strengthened skin barrier');
+    timeline['Month 2-3'].push('Better product tolerance');
+
+    // Long-term benefits (Month 4-6)
+    timeline['Month 4-6'].push('Optimal results from active ingredients');
+    timeline['Month 4-6'].push('Stable skin improvement');
+    timeline['Month 4-6'].push('Reduced need for frequent adjustments');
+
+    // Maintenance phase (Month 6+)
+    timeline['Month 6+'].push('Maintained healthy skin state');
+    timeline['Month 6+'].push('Prevention of future concerns');
+    timeline['Month 6+'].push('Opportunity to add advanced treatments');
+
+    return timeline;
+  }
+
+  generateBeforeAfterExpectations(userProfile) {
+    const before = {
+      'oily': 'Excessive shine, frequent breakouts, visible pores, makeup doesn\'t last',
+      'dry': 'Tight, flaky skin, dull appearance, fine lines more visible, makeup looks cakey',
+      'combination': 'Oily T-zone with dry cheeks, uneven texture, difficulty finding suitable products',
+      'sensitive': 'Frequent redness, irritation, burning sensation, limited product options',
+      'normal': 'Generally healthy but lacking optimization, minor concerns, preventive needs'
+    };
+
+    const after = {
+      'oily': 'Controlled oil production, fewer breakouts, refined pores, longer-lasting makeup',
+      'dry': 'Soft, supple skin, healthy glow, smoothed fine lines, better makeup application',
+      'combination': 'Balanced skin zones, even texture, easier product selection, unified appearance',
+      'sensitive': 'Calm, comfortable skin, reduced reactivity, expanded product tolerance',
+      'normal': 'Optimized skin health, enhanced natural beauty, effective aging prevention'
+    };
+
+    return {
+      current_state: before[userProfile.skinType] || 'Various skin concerns affecting confidence',
+      expected_outcome: after[userProfile.skinType] || 'Healthier, more confident skin',
+      transformation_timeline: '3-6 months for significant transformation',
+      maintenance_effort: 'Daily routine with periodic adjustments'
+    };
+  }
+
   // ============ BUDGET SUMMARY ============
   generateBudgetSummary(recommendations) {
     const allProducts = Object.keys(recommendations).reduce((acc, category) => {
@@ -936,44 +1062,124 @@ export class DynamicSkincareRecommendationEngine {
     const productCount = allProducts.length;
     const averageCost = productCount > 0 ? Math.round(totalCost / productCount) : 0;
 
+    const categoryCosts = {};
+    Object.keys(recommendations).forEach(category => {
+      categoryCosts[category] = recommendations[category].reduce((sum, rec) => sum + (rec.price || 0), 0);
+    });
+
     return {
       total_cost: totalCost,
       product_count: productCount,
       average_cost_per_product: averageCost,
-      cost_per_month: Math.round(totalCost / 3)
+      category_breakdown: categoryCosts,
+      budget_tips: this.getBudgetTips(totalCost),
+      cost_per_month: Math.round(totalCost / 3), // Assuming 3-month supply
+      value_assessment: this.assessValue(totalCost, productCount)
     };
   }
 
-  generatePersonalizedBenefits(recommendations, userProfile) {
-    const skinTypeBenefits = this.benefitsDatabase[userProfile.skinType];
+  getBudgetTips(totalCost) {
+    const tips = [];
+    
+    if (totalCost > 2000) {
+      tips.push('💡 Consider starting with essential products first, then adding treatments gradually');
+      tips.push('🛒 Look for bundle deals or subscribe-and-save options');
+    }
+    
+    tips.push('📦 Many products last 2-3 months, making the cost per use very reasonable');
+    tips.push('🎯 Invest in quality basics (cleanser, moisturizer, sunscreen) before adding actives');
+    tips.push('⚖️ Compare cost per ml/gram when choosing between similar products');
+    
+    return tips;
+  }
+
+  assessValue(totalCost, productCount) {
+    const costPerProduct = totalCost / productCount;
+    
+    if (costPerProduct < 400) {
+      return 'Excellent value - affordable products with good efficacy';
+    } else if (costPerProduct < 800) {
+      return 'Good value - balanced quality and pricing';
+    } else if (costPerProduct < 1500) {
+      return 'Premium value - higher quality ingredients and formulations';
+    } else {
+      return 'Luxury value - top-tier products with advanced formulations';
+    }
+  }
+
+  // ============ EXTEND BUTTON DATA ============
+  generateExtendButtonData(userProfile, benefits) {
     return {
-      skin_type_benefits: skinTypeBenefits,
-      timeline_benefits: this.createBenefitsTimeline(userProfile)
+      detailed_science: this.generateDetailedScience(userProfile),
+      ingredient_deep_dive: this.generateIngredientDeepDive(userProfile),
+      skin_transformation_guide: this.generateTransformationGuide(userProfile),
+      troubleshooting_guide: this.generateTroubleshootingGuide(userProfile),
+      advanced_tips: this.generateAdvancedTips(userProfile),
+      seasonal_adjustments: this.generateSeasonalAdjustments(userProfile)
     };
   }
 
-  createBenefitsTimeline(userProfile) {
-    const timeline = {
-      'Week 1-2': ['Improved cleansing and hydration', 'Sun protection established'],
-      'Week 3-4': ['Skin begins to adjust to new routine', 'Initial improvement in texture'],
-      'Month 2-3': ['Significant improvement in primary concerns', 'Strengthened skin barrier'],
-      'Month 4-6': ['Optimal results from active ingredients', 'Stable skin improvement'],
-      'Month 6+': ['Maintained healthy skin state', 'Prevention of future concerns']
+  generateDetailedScience(userProfile) {
+    const scienceBase = {
+      'oily': {
+        explanation: 'Oily skin produces excess sebum due to overactive sebaceous glands, often triggered by hormones, genetics, or environmental factors.',
+        how_products_work: 'Recommended products work by regulating sebum production, unclogging pores, and maintaining proper hydration without adding excess oil.',
+        key_mechanisms: [
+          'Niacinamide reduces sebum production by up to 30%',
+          'Salicylic acid dissolves oil and dead skin in pores',
+          'Lightweight moisturizers prevent dehydration without clogging pores'
+        ]
+      },
+      'dry': {
+        explanation: 'Dry skin lacks sufficient lipids and natural moisturizing factors, leading to impaired barrier function and water loss.',
+        how_products_work: 'Products focus on replacing lost lipids, attracting and retaining moisture, and strengthening the skin barrier.',
+        key_mechanisms: [
+          'Hyaluronic acid can hold up to 1000x its weight in water',
+          'Ceramides restore the skin\'s natural barrier',
+          'Occlusives prevent transepidermal water loss'
+        ]
+      },
+      'combination': {
+        explanation: 'Combination skin has varying sebaceous gland activity across the face, typically with an oily T-zone and normal to dry cheeks.',
+        how_products_work: 'The routine balances different needs across facial zones while using products suitable for the entire face.',
+        key_mechanisms: [
+          'Multi-functional ingredients address multiple concerns',
+          'Lightweight formulations work for all areas',
+          'Targeted application can optimize results'
+        ]
+      }
     };
 
-    // Add skin type specific benefits
-    if (userProfile.skinType === 'dry') {
-      timeline['Week 1-2'].push('Reduced skin tightness and flaking');
-    }
-    if (userProfile.concerns.includes('acne')) {
-      timeline['Week 3-4'].push('Possible initial breakout as skin purges');
-    }
-
-    return timeline;
+    return scienceBase[userProfile.skinType] || scienceBase['combination'];
   }
 
-  // ============ UTILITY FUNCTIONS ============
+  generateIngredientDeepDive(userProfile) {
+    // This would contain detailed information about each recommended ingredient
+    return {
+      star_ingredients: this.getStarIngredients(userProfile),
+      how_they_work: this.getIngredientMechanisms(userProfile),
+      scientific_backing: this.getScientificEvidence(userProfile),
+      concentration_guide: this.getConcentrationGuide(userProfile)
+    };
+  }
+
+  getStarIngredients(userProfile) {
+    const starIngredients = {
+      'oily': ['Niacinamide', 'Salicylic Acid', 'Zinc Oxide'],
+      'dry': ['Hyaluronic Acid', 'Ceramides', 'Glycerin'],
+      'combination': ['Niacinamide', 'Hyaluronic Acid', 'Vitamin C'],
+      'sensitive': ['Niacinamide', 'Ceramides', 'Zinc Oxide'],
+      'normal': ['Vitamin C', 'Retinol', 'Hyaluronic Acid']
+    };
+
+    return starIngredients[userProfile.skinType] || starIngredients['normal'];
+  }
+
+  // ============ ENHANCED INPUT VALIDATION ============
   validateAndNormalizeInput(assessmentData) {
+    // Handle case where assessmentData might be null, undefined, or not an object
+    const data = assessmentData && typeof assessmentData === 'object' ? assessmentData : {};
+    
     const defaults = {
       skinType: 'normal',
       concerns: ['hydrate_skin'],
@@ -982,24 +1188,34 @@ export class DynamicSkincareRecommendationEngine {
       gender: 'prefer_not_to_say',
       sensitivity: 5,
       climate: 'moderate',
-      budget: 'budget',
+      budget: 'budget-friendly',
       experience: 'beginner',
       goals: ['hydrate_skin'],
       lifestyle: 'mixed',
-      additionalConcerns: ''
+      additionalConcerns: '',
+      location: ''
     };
 
     const normalized = {
       ...defaults,
-      ...assessmentData,
-      concerns: Array.isArray(assessmentData.concerns) ? assessmentData.concerns : [assessmentData.concerns].filter(Boolean),
-      medicalConditions: Array.isArray(assessmentData.medicalConditions) ? assessmentData.medicalConditions : [assessmentData.medicalConditions].filter(Boolean),
-      goals: Array.isArray(assessmentData.goals) ? assessmentData.goals : [assessmentData.goals].filter(Boolean),
-      sensitivity: Math.max(1, Math.min(10, parseInt(assessmentData.sensitivity) || 5))
+      ...data,
+      // Safely normalize arrays
+      concerns: this.safeArray(data.concerns).filter(Boolean),
+      medicalConditions: this.safeArray(data.medicalConditions).filter(Boolean),
+      goals: this.safeArray(data.goals).filter(Boolean),
+      // Safely normalize sensitivity
+      sensitivity: Math.max(1, Math.min(10, parseInt(data.sensitivity) || 5)),
+      // Safely normalize strings
+      skinType: this.safeString(data.skinType) || 'normal',
+      climate: this.safeString(data.climate) || 'moderate',
+      budget: this.safeString(data.budget) || 'budget-friendly',
+      experience: this.safeString(data.experience) || 'beginner',
+      location: this.safeString(data.location) || ''
     };
 
     // Auto-detect climate for Hyderabad
-    if (assessmentData.location && assessmentData.location.toLowerCase().includes('hyderabad')) {
+    const location = normalized.location.toLowerCase();
+    if (location.includes('hyderabad') || location.includes('hyd')) {
       normalized.climate = 'hot_humid';
     }
 
@@ -1028,25 +1244,25 @@ export class DynamicSkincareRecommendationEngine {
 
   prioritizeConcerns(concerns, goals) {
     const concernPriority = {
-      'cystic-acne': 100,
-      'acne': 90,
-      'sensitivity': 85,
-      'aging': 80,
-      'hyperpigmentation': 75,
-      'dryness': 70,
-      'oiliness': 65,
-      'texture': 60,
-      'pores': 55,
-      'sun-damage': 95
+      'severe_cystic_acne': 100,
+      'acne_breakouts': 90,
+      'sensitivity_redness': 85,
+      'fine_lines_wrinkles': 80,
+      'dark_spots_hyperpigmentation': 75,
+      'dryness_dehydration': 70,
+      'excess_oil_shine': 65,
+      'uneven_texture': 60,
+      'large_pores': 55,
+      'sun_protection': 95
     };
 
     const goalToConcernMap = {
-      'clear-acne': 'acne',
-      'anti-aging': 'aging',
-      'brighten-skin': 'hyperpigmentation',
-      'hydrate-skin': 'dryness',
-      'minimize-pores': 'pores',
-      'sun-protection': 'sun-damage'
+      'clear_acne': 'acne_breakouts',
+      'anti_aging': 'fine_lines_wrinkles',
+      'brighten_skin': 'dark_spots_hyperpigmentation',
+      'hydrate_skin': 'dryness_dehydration',
+      'minimize_pores': 'large_pores',
+      'sun_protection': 'sun_protection'
     };
 
     const allConcerns = [...concerns];
@@ -1061,22 +1277,278 @@ export class DynamicSkincareRecommendationEngine {
     );
   }
 
+  // ============ ESSENTIAL PRODUCTS GENERATION ============
+  getEssentialProducts(userProfile) {
+    const essentials = [];
+    
+    // Cleanser selection based on skin type and budget
+    const cleanserOptions = this.getCleanserOptions(userProfile);
+    if (cleanserOptions.length > 0) {
+      essentials.push({
+        productId: cleanserOptions[0],
+        reasoning: 'Essential daily cleanser for healthy skin maintenance',
+        category: 'essential',
+        priority: 100
+      });
+    }
+
+    // Moisturizer selection
+    const moisturizerOptions = this.getMoisturizerOptions(userProfile);
+    if (moisturizerOptions.length > 0) {
+      essentials.push({
+        productId: moisturizerOptions[0],
+        reasoning: 'Daily moisturizer for hydration and barrier protection',
+        category: 'essential',
+        priority: 95
+      });
+    }
+
+    // Sunscreen selection
+    const sunscreenOptions = this.getSunscreenOptions(userProfile);
+    if (sunscreenOptions.length > 0) {
+      essentials.push({
+        productId: sunscreenOptions[0],
+        reasoning: 'Daily sun protection to prevent aging and damage',
+        category: 'essential',
+        priority: 100
+      });
+    }
+
+    return essentials;
+  }
+
+  getCleanserOptions(userProfile) {
+    const budgetLimits = {
+      'budget-friendly': 500,
+      'mid-range': 1500,
+      'premium': 3000,
+      'luxury': 10000
+    };
+    const maxBudget = budgetLimits[userProfile.budget] || 500;
+
+    const cleanserPriority = [];
+
+    // Budget-friendly options
+    if (maxBudget >= 199) {
+      if (userProfile.skinType === 'sensitive' || userProfile.sensitivity > 7) {
+        cleanserPriority.push('cetaphil_gentle_cleanser', 'simple_refreshing_cleanser');
+      } else if (userProfile.skinType === 'oily' || userProfile.concerns.includes('acne_breakouts')) {
+        cleanserPriority.push('neutrogena_oil_free_cleanser');
+      } else {
+        cleanserPriority.push('simple_refreshing_cleanser', 'cetaphil_gentle_cleanser');
+      }
+    }
+
+    // Mid-range options
+    if (maxBudget >= 990) {
+      cleanserPriority.unshift('cerave_foaming_cleanser');
+      if (userProfile.medicalConditions.includes('rosacea')) {
+        cleanserPriority.unshift('paula_choice_cleanser');
+      }
+    }
+
+    return cleanserPriority.filter(id => {
+      const product = this.productDatabase[id];
+      return product && product.price <= maxBudget;
+    });
+  }
+
+  getMoisturizerOptions(userProfile) {
+    const budgetLimits = {
+      'budget-friendly': 500,
+      'mid-range': 1500,
+      'premium': 3000,
+      'luxury': 10000
+    };
+    const maxBudget = budgetLimits[userProfile.budget] || 500;
+
+    const moisturizerPriority = [];
+
+    // Budget-friendly options
+    if (maxBudget >= 149) {
+      if (userProfile.skinType === 'dry' || userProfile.climate === 'cold') {
+        moisturizerPriority.push('nivea_soft_cream');
+      } else {
+        moisturizerPriority.push('ponds_super_light_gel');
+      }
+    }
+
+    // Mid-range options
+    if (maxBudget >= 699) {
+      if (userProfile.skinType === 'oily' || userProfile.climate === 'hot_humid') {
+        moisturizerPriority.unshift('neutrogena_hydra_boost');
+      } else {
+        moisturizerPriority.unshift('cerave_daily_moisturizer');
+      }
+    }
+
+    return moisturizerPriority.filter(id => {
+      const product = this.productDatabase[id];
+      return product && product.price <= maxBudget;
+    });
+  }
+
+  getSunscreenOptions(userProfile) {
+    const budgetLimits = {
+      'budget-friendly': 500,
+      'mid-range': 1500,
+      'premium': 3000,
+      'luxury': 10000
+    };
+    const maxBudget = budgetLimits[userProfile.budget] || 500;
+
+    const sunscreenPriority = [];
+
+    // Budget-friendly options
+    if (maxBudget >= 299) {
+      sunscreenPriority.push('lakme_sunscreen');
+      if (maxBudget >= 449) {
+        sunscreenPriority.unshift('neutrogena_ultra_sheer');
+      }
+    }
+
+    // Mid-range options
+    if (maxBudget >= 899) {
+      sunscreenPriority.unshift('la_roche_posay_sunscreen');
+      if (userProfile.sensitivity > 7 || userProfile.medicalConditions.includes('rosacea')) {
+        sunscreenPriority.unshift('eltamd_sunscreen');
+      }
+    }
+
+    return sunscreenPriority.filter(id => {
+      const product = this.productDatabase[id];
+      return product && product.price <= maxBudget;
+    });
+  }
+
+  // ============ CONCERN-BASED PRODUCTS ============
+  getConcernBasedProducts(userProfile) {
+    const concernProducts = [];
+    const budgetLimits = {
+      'budget-friendly': 500,
+      'mid-range': 1500,
+      'premium': 3000,
+      'luxury': 10000
+    };
+    const maxBudget = budgetLimits[userProfile.budget] || 500;
+    
+    userProfile.concerns.forEach((concern, index) => {
+      const priority = 90 - (index * 10);
+      
+      switch(concern) {
+        case 'acne_breakouts':
+          // Always recommend niacinamide for acne
+          if (maxBudget >= 349) {
+            concernProducts.push({
+              productId: 'minimalist_niacinamide',
+              reasoning: 'Controls oil production and reduces acne inflammation',
+              category: 'targeted',
+              priority: priority
+            });
+          }
+          
+          // Add BHA for intermediate+ users
+          if (userProfile.experience !== 'beginner' && maxBudget >= 1299) {
+            concernProducts.push({
+              productId: 'paula_choice_bha',
+              reasoning: 'Unclogs pores and prevents new breakouts',
+              category: 'targeted',
+              priority: priority - 5
+            });
+          }
+          break;
+          
+        case 'fine_lines_wrinkles':
+          // Vitamin C for anti-aging
+          if (maxBudget >= 899) {
+            concernProducts.push({
+              productId: 'cosrx_vitamin_c',
+              reasoning: 'Antioxidant protection and collagen support',
+              category: 'targeted',
+              priority: priority
+            });
+          }
+          
+          // Retinol for advanced users
+          if (userProfile.experience === 'advanced' && maxBudget >= 2800 && userProfile.age > 25) {
+            concernProducts.push({
+              productId: 'skinceuticals_retinol',
+              reasoning: 'Gold standard for anti-aging and skin renewal',
+              category: 'targeted',
+              priority: priority + 5
+            });
+          }
+          break;
+          
+        case 'dark_spots_hyperpigmentation':
+          if (maxBudget >= 899) {
+            concernProducts.push({
+              productId: 'cosrx_vitamin_c',
+              reasoning: 'Brightens skin tone and fades dark spots',
+              category: 'targeted',
+              priority: priority
+            });
+          }
+          break;
+          
+        case 'dryness_dehydration':
+          if (maxBudget >= 490) {
+            concernProducts.push({
+              productId: 'the_ordinary_hyaluronic_acid',
+              reasoning: 'Intense hydration and moisture retention',
+              category: 'targeted',
+              priority: priority
+            });
+          }
+          break;
+          
+        case 'excess_oil_shine':
+        case 'large_pores':
+          if (maxBudget >= 349) {
+            concernProducts.push({
+              productId: 'minimalist_niacinamide',
+              reasoning: 'Controls sebum production and minimizes pore appearance',
+              category: 'targeted',
+              priority: priority
+            });
+          }
+          break;
+      }
+    });
+
+    return concernProducts;
+  }
+
   // ============ MEDICAL CONSTRAINTS ============
   applyMedicalConstraints(recommendations, userProfile) {
     if (userProfile.medicalConditions.length === 0) {
       return recommendations;
     }
 
-    let filteredRecommendations = [...recommendations];
+    const filteredRecommendations = [...recommendations];
     
     userProfile.medicalConditions.forEach(condition => {
       switch(condition) {
         case 'eczema':
-          filteredRecommendations = this.removeProductsByStrength(filteredRecommendations, ['moderate', 'strong']);
+          // Remove harsh actives, add gentle products
+          this.removeProductsByStrength(filteredRecommendations, ['moderate', 'strong']);
           break;
           
         case 'rosacea':
-          filteredRecommendations = this.removeProductsWithIngredients(filteredRecommendations, ['retinol']);
+          // Remove retinoids and strong actives
+          this.removeProductsWithIngredients(filteredRecommendations, ['retinol']);
+          // Prefer gentle, anti-inflammatory products
+          break;
+          
+        case 'severe_cystic_acne':
+          // Add medical consultation note
+          filteredRecommendations.push({
+            productId: 'medical_consultation',
+            reasoning: 'Professional dermatological treatment recommended for severe acne',
+            category: 'medical',
+            priority: 100,
+            medicallyRequired: true
+          });
           break;
       }
     });
@@ -1107,12 +1579,13 @@ export class DynamicSkincareRecommendationEngine {
     const conflictPairs = [
       ['retinol', 'vitamin_c'],
       ['retinol', 'salicylic_acid'],
-      ['vitamin_c', 'niacinamide']
+      ['vitamin_c', 'niacinamide'] // Only at high concentrations
     ];
 
     const resolvedRecommendations = [];
     const addedIngredients = new Set();
 
+    // Sort by priority
     const sortedRecommendations = recommendations.sort((a, b) => b.priority - a.priority);
 
     for (const recommendation of sortedRecommendations) {
@@ -1263,17 +1736,18 @@ export class DynamicSkincareRecommendationEngine {
 
   // ============ PERSONALIZATION ============
   personalizeRecommendations(recommendations, userProfile) {
-    const budgetLimits = {
-      'budget': 500,
-      'mid-range': 1500,
-      'premium': 3000,
-      'luxury': 10000
-    };
-    const maxBudget = budgetLimits[userProfile.budget] || 500;
-    
     return recommendations.filter(rec => {
       const product = this.productDatabase[rec.productId];
       if (!product) return false;
+
+      // Budget check (already done in budget filtering, but double-check)
+      const budgetLimits = {
+        'budget-friendly': 500,
+        'mid-range': 1500,
+        'premium': 3000,
+        'luxury': 10000
+      };
+      const maxBudget = budgetLimits[userProfile.budget] || 500;
       
       return product.price <= maxBudget || rec.medicallyRequired;
     });
@@ -1284,12 +1758,21 @@ export class DynamicSkincareRecommendationEngine {
     const structured = {
       essential: [],
       targeted: [],
-      supporting: []
+      supporting: [],
+      optional: []
     };
 
     recommendations.forEach(rec => {
       const category = this.determineOutputCategory(rec, userProfile);
       structured[category].push(rec);
+    });
+
+    // Apply limits based on experience
+    const limits = this.getRecommendationLimits(userProfile);
+    Object.keys(structured).forEach(category => {
+      if (structured[category].length > limits[category]) {
+        structured[category] = structured[category].slice(0, limits[category]);
+      }
     });
 
     return structured;
@@ -1309,82 +1792,84 @@ export class DynamicSkincareRecommendationEngine {
       return 'targeted';
     }
     
-    return 'supporting';
-  }
-
-  generateDetailedWarnings(recommendations, userProfile) {
-    const warnings = [];
+    if (recommendation.matchScore > 60) {
+      return 'supporting';
+    }
     
-    warnings.push({
-      type: 'general',
-      message: 'Always patch test new products on a small area before full application',
-      severity: 'high'
-    });
-
-    warnings.push({
-      type: 'general', 
-      message: 'Use sunscreen daily, especially when using active ingredients',
-      severity: 'high'
-    });
-
-    if (userProfile.experience === 'beginner') {
-      warnings.push({
-        type: 'beginner',
-        message: 'Start with one new product at a time and wait 1-2 weeks before adding the next',
-        severity: 'medium'
-      });
-    }
-
-    if (userProfile.climate === 'hot_humid') {
-      warnings.push({
-        type: 'climate',
-        message: 'In humid weather, allow extra time between product applications to prevent pilling',
-        severity: 'medium'
-      });
-    }
-
-    return warnings;
+    return 'optional';
   }
 
-  generateDetailedTimeline(recommendations, userProfile) {
-    const timeline = {};
-    
-    if (userProfile.experience === 'beginner') {
-      timeline.week_1_2 = 'Start with cleanser, moisturizer, and sunscreen only';
-      timeline.week_3_4 = 'Add gentle ingredients like niacinamide or hyaluronic acid';
-      timeline.month_2_3 = 'Introduce actives gradually if previous products are well-tolerated';
-      timeline.month_4_plus = 'Add additional treatments based on skin response';
-    } else {
-      timeline.week_1_2 = 'Establish basic routine with all essential products';
-      timeline.week_3_4 = 'Add primary active ingredient';
-      timeline.month_2 = 'Add supporting ingredients';
-      timeline.month_3_plus = 'Add secondary actives if needed';
-    }
+  getRecommendationLimits(userProfile) {
+    const baseLimits = {
+      'beginner': { essential: 4, targeted: 2, supporting: 1, optional: 0 },
+      'intermediate': { essential: 4, targeted: 3, supporting: 2, optional: 1 },
+      'advanced': { essential: 5, targeted: 4, supporting: 3, optional: 2 },
+      'expert': { essential: 5, targeted: 5, supporting: 4, optional: 3 }
+    };
 
-    return timeline;
+    return baseLimits[userProfile.experience] || baseLimits['beginner'];
   }
 
-  // ============ HELPER FUNCTIONS ============
+  // ============ UTILITY FUNCTIONS FOR ERROR HANDLING ============
+  safeString(value) {
+    if (typeof value === 'string') return value;
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'object') return JSON.stringify(value);
+    return String(value);
+  }
+
+  safeArray(value) {
+    if (Array.isArray(value)) return value;
+    if (!value) return [];
+    if (typeof value === 'string') return [value];
+    return [value];
+  }
+
+  sanitizeResponse(response) {
+    try {
+      // Ensure all text fields are strings and handle any potential issues
+      const sanitized = JSON.parse(JSON.stringify(response, (key, value) => {
+        if (typeof value === 'string') {
+          return value;
+        }
+        if (value === null || value === undefined) {
+          return '';
+        }
+        if (typeof value === 'object' && !Array.isArray(value)) {
+          return value;
+        }
+        return value;
+      }));
+      
+      return sanitized;
+    } catch (error) {
+      console.error('Error sanitizing response:', error);
+      return response;
+    }
+  }
+
+  // Add the missing parseAgeRange function
   parseAgeRange(ageString) {
     const ageRanges = {
-      'teens': 16,
-      'twenties': 25,
-      'thirties': 35,
-      'forties': 45,
-      'fifties-plus': 55
+      '13-19': 16,
+      '20-29': 25,
+      '30-39': 35,
+      '40-49': 45,
+      '50+': 55
     };
-    return ageRanges[ageString] || 25;
+    return ageRanges[this.safeString(ageString)] || 25;
   }
 
   calculateRiskTolerance(experience, sensitivity) {
     const experienceScore = { 'beginner': 1, 'intermediate': 2, 'advanced': 3, 'expert': 4 }[experience] || 1;
-    const sensitivityScore = 11 - sensitivity;
+    const sensitivityScore = 11 - (parseInt(sensitivity) || 5);
     return Math.round((experienceScore + sensitivityScore) / 2);
   }
 
   calculateRoutineComplexity(experience, age) {
     const experienceScore = { 'beginner': 1, 'intermediate': 2, 'advanced': 3, 'expert': 4 }[experience] || 1;
-    const ageScore = age < 25 ? 1 : age < 35 ? 2 : age < 45 ? 3 : 4;
+    const numericAge = parseInt(age) || 25;
+    const ageScore = numericAge < 25 ? 1 : numericAge < 35 ? 2 : numericAge < 45 ? 3 : 4;
     return Math.round((experienceScore + ageScore) / 2);
   }
 
@@ -1404,23 +1889,60 @@ export class DynamicSkincareRecommendationEngine {
     });
   }
 
+  getSkinTypeProducts(userProfile) {
+    // This is handled in getEssentialProducts and getConcernBasedProducts
+    return [];
+  }
+
+  getAgeBasedProducts(userProfile) {
+    const products = [];
+    
+    // Anti-aging for 30+
+    if (userProfile.age >= 30 && userProfile.experience !== 'beginner') {
+      const budgetLimits = {
+        'budget-friendly': 500,
+        'mid-range': 1500,
+        'premium': 3000,
+        'luxury': 10000
+      };
+      const maxBudget = budgetLimits[userProfile.budget] || 500;
+      
+      if (maxBudget >= 899) {
+        products.push({
+          productId: 'cosrx_vitamin_c',
+          reasoning: 'Age-appropriate antioxidant for prevention',
+          category: 'age_based',
+          priority: 70
+        });
+      }
+    }
+
+    return products;
+  }
+
   // ============ FALLBACK SYSTEM ============
   generateFallbackRecommendations(assessmentData) {
     console.log('🔄 Generating fallback recommendations');
     
     const skinType = assessmentData.skinType || 'normal';
-    const budget = assessmentData.budget || 'budget';
+    const budget = assessmentData.budget || 'budget-friendly';
     
     const fallbackProducts = {
-      'budget': {
+      'budget-friendly': {
         'oily': ['simple_refreshing_cleanser', 'minimalist_niacinamide', 'ponds_super_light_gel', 'neutrogena_ultra_sheer'],
         'dry': ['cetaphil_gentle_cleanser', 'the_ordinary_hyaluronic_acid', 'nivea_soft_cream', 'neutrogena_ultra_sheer'],
         'sensitive': ['cetaphil_gentle_cleanser', 'nivea_soft_cream', 'neutrogena_ultra_sheer'],
         'default': ['simple_refreshing_cleanser', 'ponds_super_light_gel', 'lakme_sunscreen']
+      },
+      'mid-range': {
+        'oily': ['cerave_foaming_cleanser', 'minimalist_niacinamide', 'neutrogena_hydra_boost', 'la_roche_posay_sunscreen'],
+        'dry': ['cerave_foaming_cleanser', 'the_ordinary_hyaluronic_acid', 'cerave_daily_moisturizer', 'la_roche_posay_sunscreen'],
+        'sensitive': ['cerave_foaming_cleanser', 'cerave_daily_moisturizer', 'la_roche_posay_sunscreen'],
+        'default': ['cerave_foaming_cleanser', 'neutrogena_hydra_boost', 'la_roche_posay_sunscreen']
       }
     };
 
-    const products = fallbackProducts[budget]?.[skinType] || fallbackProducts[budget]?.['default'] || fallbackProducts['budget']['default'];
+    const products = fallbackProducts[budget]?.[skinType] || fallbackProducts[budget]?.['default'] || fallbackProducts['budget-friendly']['default'];
 
     return {
       user_profile: { 
@@ -1445,7 +1967,8 @@ export class DynamicSkincareRecommendationEngine {
           };
         }),
         targeted: [],
-        supporting: []
+        supporting: [],
+        optional: []
       },
       routine_suggestions: {
         morning: ['Cleanser', 'Moisturizer', 'Sunscreen'],
@@ -1455,20 +1978,229 @@ export class DynamicSkincareRecommendationEngine {
         type: 'fallback',
         message: 'These are basic recommendations. Consider retaking the assessment for personalized suggestions.',
         severity: 'medium'
-      }]
+      }],
+      budget_summary: {
+        total_cost: products.reduce((sum, productId) => {
+          const product = this.productDatabase[productId];
+          return sum + (product?.price || 0);
+        }, 0)
+      }
     };
   }
 
-  // ============ REQUIRED STUB METHODS ============
-  initializeRuleMatrix() {
-    return {};
+  // ============ ADDITIONAL HELPER METHODS ============
+  generateDetailedTimeline(recommendations, userProfile) {
+    const timeline = {};
+    
+    if (userProfile.experience === 'beginner') {
+      timeline.week_1_2 = 'Start with cleanser, moisturizer, and sunscreen only. Use gentle products to establish routine.';
+      timeline.week_3_4 = 'Add one gentle active ingredient like niacinamide or hyaluronic acid if basic routine is well-tolerated.';
+      timeline.month_2_3 = 'Introduce stronger actives gradually if previous products caused no irritation.';
+      timeline.month_4_plus = 'Add additional treatments based on skin response and specific needs.';
+    } else {
+      timeline.week_1_2 = 'Establish basic routine with all essential products.';
+      timeline.week_3_4 = 'Add primary active ingredient and monitor response.';
+      timeline.month_2 = 'Add supporting ingredients and optimize routine timing.';
+      timeline.month_3_plus = 'Evaluate effectiveness and adjust concentrations or add secondary actives if needed.';
+    }
+
+    return timeline;
+  }
+
+  generateDetailedWarnings(recommendations, userProfile) {
+    const warnings = [];
+    
+    // General warnings
+    warnings.push({
+      type: 'general',
+      message: 'Always patch test new products on a small area before full application',
+      severity: 'high'
+    });
+
+    warnings.push({
+      type: 'general', 
+      message: 'Use sunscreen daily, especially when using active ingredients',
+      severity: 'high'
+    });
+
+    // Experience-based warnings
+    if (userProfile.experience === 'beginner') {
+      warnings.push({
+        type: 'beginner',
+        message: 'Start with one new product at a time and wait 1-2 weeks before adding the next',
+        severity: 'medium'
+      });
+    }
+
+    // Climate-specific warnings
+    if (userProfile.climate === 'hot_humid') {
+      warnings.push({
+        type: 'climate',
+        message: 'In humid weather, allow extra time between product applications to prevent pilling',
+        severity: 'medium'
+      });
+    }
+
+    return warnings;
   }
 
   initializeConflictMatrix() {
-    return {};
+    return {
+      'retinol': ['vitamin_c', 'salicylic_acid'],
+      'vitamin_c': ['retinol', 'niacinamide'],
+      'salicylic_acid': ['retinol']
+    };
   }
 
   initializeFallbacks() {
-    return {};
+    return {
+      'oily': ['Oil Control Cleanser', 'Niacinamide Serum', 'Lightweight Moisturizer', 'Mineral Sunscreen'],
+      'dry': ['Gentle Cleanser', 'Hyaluronic Acid Serum', 'Rich Moisturizer', 'Mineral Sunscreen'],
+      'sensitive': ['Gentle Cleanser', 'Fragrance-Free Moisturizer', 'Mineral Sunscreen'],
+      'combination': ['Gentle Cleanser', 'Niacinamide Serum', 'Lightweight Moisturizer', 'Mineral Sunscreen'],
+      'normal': ['Gentle Cleanser', 'Vitamin C Serum', 'Daily Moisturizer', 'Broad Spectrum Sunscreen'],
+      'default': ['Gentle Cleanser', 'Basic Moisturizer', 'Broad Spectrum Sunscreen']
+    };
   }
+
+  initializeRuleMatrix() {
+    // Simplified for space - in production this would be more comprehensive
+    return {
+      skinType: {
+        'oily': {
+          recommended: ['oil_control', 'bha', 'niacinamide'],
+          avoid: ['heavy_creams', 'oils'],
+          priorityConcerns: ['excess_oil_shine', 'acne_breakouts']
+        }
+      }
+    };
+  }
+
+  // ============ MISSING METHODS IMPLEMENTATION ============
+  getIngredientMechanisms(userProfile) {
+    const mechanisms = {
+      'niacinamide': 'Regulates sebaceous gland activity and reduces inflammation through multiple pathways',
+      'hyaluronic_acid': 'Binds water molecules to provide intense hydration and plumping effects',
+      'vitamin_c': 'Neutralizes free radicals and stimulates collagen synthesis for anti-aging benefits',
+      'retinol': 'Accelerates cell turnover and stimulates collagen production for skin renewal',
+      'salicylic_acid': 'Penetrates oil-filled pores to dissolve debris and reduce inflammation'
+    };
+
+    const starIngredients = this.getStarIngredients(userProfile);
+    return starIngredients.reduce((acc, ingredient) => {
+      const key = ingredient.toLowerCase().replace(' ', '_');
+      acc[ingredient] = mechanisms[key] || 'Works through proven dermatological mechanisms';
+      return acc;
+    }, {});
+  }
+
+  getScientificEvidence(userProfile) {
+    return {
+      evidence_level: 'High',
+      clinical_studies: 'Based on peer-reviewed dermatological research',
+      safety_profile: 'Extensively tested for safety and efficacy',
+      regulatory_approval: 'Ingredients approved by international cosmetic regulations'
+    };
+  }
+
+  getConcentrationGuide(userProfile) {
+    const guide = {
+      'niacinamide': '2-10% - Start with 5% for beginners',
+      'hyaluronic_acid': '0.1-2% - Higher concentrations for very dry skin',
+      'vitamin_c': '5-20% - Start with 10% and gradually increase',
+      'retinol': '0.01-1% - Begin with 0.25% for beginners',
+      'salicylic_acid': '0.5-2% - Use 1% for daily use, 2% for spot treatment'
+    };
+
+    return guide;
+  }
+
+  generateTransformationGuide(userProfile) {
+    return {
+      phase_1: 'Foundation building (Weeks 1-4): Establish basic routine tolerance',
+      phase_2: 'Active introduction (Weeks 5-12): Add targeted treatments gradually',
+      phase_3: 'Optimization (Months 3-6): Fine-tune routine for maximum effectiveness',
+      phase_4: 'Maintenance (6+ months): Sustain results with consistent routine'
+    };
+  }
+
+  generateTroubleshootingGuide(userProfile) {
+    return {
+      common_issues: [
+        'Initial breakouts: Normal purging process, should improve in 4-6 weeks',
+        'Irritation: Reduce frequency or concentration of active ingredients',
+        'No results: Allow 8-12 weeks for visible improvements',
+        'Product pilling: Apply thinner layers and wait between applications'
+      ],
+      when_to_adjust: 'After 6-8 weeks of consistent use without improvement',
+      red_flags: 'Severe irritation, persistent burning, or worsening of conditions'
+    };
+  }
+
+  generateAdvancedTips(userProfile) {
+    return {
+      layering_order: 'Thinnest to thickest consistency for optimal absorption',
+      timing_optimization: 'Use actives when skin is most receptive (evening for most)',
+      seasonal_adjustments: 'Lighter formulations in summer, richer in winter',
+      ingredient_cycling: 'Rotate strong actives to prevent tolerance buildup'
+    };
+  }
+
+  generateSeasonalAdjustments(userProfile) {
+    return {
+      summer: 'Increase sun protection, use lighter moisturizers, add antioxidants',
+      winter: 'Focus on barrier repair, use richer moisturizers, reduce exfoliation',
+      monsoon: 'Emphasize antimicrobial ingredients, use oil-free formulations',
+      spring: 'Transition routine gradually, introduce new products carefully'
+    };
+  }
+}
+
+// ============ SAFE EXPORT FOR DIFFERENT ENVIRONMENTS ============
+try {
+  // For browser environments
+  if (typeof window !== 'undefined') {
+    window.DynamicSkincareRecommendationEngine = DynamicSkincareRecommendationEngine;
+    console.log('✅ Skincare Engine V2.0 loaded in browser');
+  }
+  
+  // For Node.js environments
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { 
+      DynamicSkincareRecommendationEngine
+    };
+  }
+} catch (error) {
+  console.warn('Environment detection failed:', error.message);
+}
+
+// ============ SIMPLE USAGE EXAMPLE ============
+const createSimpleExample = () => {
+  const engine = new DynamicSkincareRecommendationEngine();
+  
+  // Simple test function that can be called safely
+  const testUser = {
+    skinType: 'oily',
+    concerns: ['acne_breakouts'],
+    budget: 'budget-friendly',
+    experience: 'beginner',
+    location: 'Hyderabad'
+  };
+
+  return engine.generateRecommendations('test_user', testUser)
+    .then(result => {
+      console.log('✅ Test successful!');
+      console.log('Products recommended:', Object.keys(result.recommendations).reduce((acc, cat) => acc + result.recommendations[cat].length, 0));
+      console.log('Total budget:', result.budget_summary?.total_cost || 'N/A');
+      return result;
+    })
+    .catch(error => {
+      console.error('❌ Test failed:', error);
+      return { error: error.message };
+    });
+};
+
+// Make the example function available globally
+if (typeof window !== 'undefined') {
+  window.createSimpleExample = createSimpleExample;
 }

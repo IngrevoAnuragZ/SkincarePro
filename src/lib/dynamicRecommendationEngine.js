@@ -2174,6 +2174,9 @@ try {
   console.warn('Environment detection failed:', error.message);
 }
 
+// Add default export for ES6 modules
+export default DynamicSkincareRecommendationEngine;
+
 // ============ SIMPLE USAGE EXAMPLE ============
 const createSimpleExample = () => {
   const engine = new DynamicSkincareRecommendationEngine();

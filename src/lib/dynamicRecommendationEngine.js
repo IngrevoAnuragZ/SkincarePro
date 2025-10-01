@@ -831,8 +831,8 @@ class DynamicSkincareRecommendationEngine {
         ]
       }
     };
-  }
-        name: 'La Roche-Posay Anthelios Sunscreen SPF 50',
+  },
+        {  name: 'La Roche-Posay Anthelios Sunscreen SPF 50',
         category: 'sunscreen',
         price: 899,
         suitableFor: ['sensitive', 'all'],
@@ -844,6 +844,7 @@ class DynamicSkincareRecommendationEngine {
         spf: 50,
         essential: true,
         benefits: ['Photostable filters', 'Water resistant', 'Antioxidants']
+      }
       },
       'eltamd_sunscreen': {
         name: 'EltaMD UV Clear Broad-Spectrum SPF 46',

@@ -55,10 +55,7 @@ class AuthService {
   private async initialize() {
     try {
       // Get initial session
-      const { data: { session }, error } = await supabase.auth.getSession().catch(() => ({
-        data: { session: null },
-        error: null
-      }))
+      const { data: { session }, error } = await supabase.auth.getSession()
       
       if (error) {
         console.error('Error getting session:', error)

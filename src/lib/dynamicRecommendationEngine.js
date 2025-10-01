@@ -1182,7 +1182,7 @@ class DynamicSkincareRecommendationEngine {
     
     const defaults = {
       skinType: 'normal',
-      concerns: ['hydrate_skin'],
+      skinConcerns: ['hydrate_skin'],
       medicalConditions: [],
       age: '20-29',
       gender: 'prefer_not_to_say',
@@ -1200,9 +1200,9 @@ class DynamicSkincareRecommendationEngine {
       ...defaults,
       ...data,
       // Safely normalize arrays
-      concerns: this.safeArray(data.concerns).filter(Boolean),
+      skinConcerns: this.safeArray(data.skinConcerns).filter(Boolean),
       medicalConditions: this.safeArray(data.medicalConditions).filter(Boolean),
-      goals: this.safeArray(data.goals).filter(Boolean),
+      primaryGoals: this.safeArray(data.primaryGoals).filter(Boolean),
       // Safely normalize sensitivity
       sensitivity: Math.max(1, Math.min(10, parseInt(data.sensitivity) || 5)),
       // Safely normalize strings
@@ -1229,13 +1229,13 @@ class DynamicSkincareRecommendationEngine {
       gender: data.gender,
       climate: data.climate,
       lifestyle: data.lifestyle,
-      concerns: this.prioritizeConcerns(data.concerns, data.goals),
+      concerns: this.prioritizeConcerns(data.skinConcerns, data.primaryGoals),
       medicalConditions: data.medicalConditions,
       sensitivity: data.sensitivity,
       additionalConcerns: data.additionalConcerns,
       experience: data.experience,
       budget: data.budget,
-      goals: data.goals,
+      goals: data.primaryGoals,
       riskTolerance: this.calculateRiskTolerance(data.experience, data.sensitivity),
       routineComplexity: this.calculateRoutineComplexity(data.experience, data.age),
       primaryConcern: this.identifyPrimaryConcern(data.concerns, data.goals)

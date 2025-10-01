@@ -4,14 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import ProgressSteps from '../components/common/ProgressSteps';
 import QuestionCard, { AnswerType } from '../components/assessment/QuestionCard';
-import GamificationDashboard from '../components/gamification/GamificationDashboard';
-import CollaborativeFiltering from '../components/ml/CollaborativeFiltering';
-import SeasonalAdaptation from '../components/ml/SeasonalAdaptation';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import DynamicSkincareRecommendationEngine from '../lib/dynamicRecommendationEngine';
 
-// Import existing questions from the original assessment
+// Complete 13-question assessment
 const questions = [
   {
     id: 'skinType',
@@ -37,7 +34,9 @@ const questions = [
       { id: 'hyperpigmentation', text: 'Dark Spots', value: 'dark_spots_hyperpigmentation' },
       { id: 'dryness', text: 'Dryness', value: 'dryness_dehydration' },
       { id: 'oiliness', text: 'Excess Oil', value: 'excess_oil_shine' },
-      { id: 'sensitivity', text: 'Sensitivity', value: 'sensitivity_redness' }
+      { id: 'sensitivity', text: 'Sensitivity', value: 'sensitivity_redness' },
+      { id: 'pores', text: 'Large Pores', value: 'large_pores' },
+      { id: 'texture', text: 'Uneven Texture', value: 'uneven_texture' }
     ]
   },
   {
@@ -54,14 +53,61 @@ const questions = [
     ]
   },
   {
+    id: 'medicalConditions',
+    text: 'Do you have any of these skin conditions?',
+    description: 'Select all that apply. This helps us recommend safer products.',
+    type: 'multiple' as const,
+    answers: [
+      { id: 'none', text: 'None of the above', value: 'none' },
+      { id: 'eczema', text: 'Eczema/Atopic Dermatitis', value: 'eczema' },
+      { id: 'rosacea', text: 'Rosacea', value: 'rosacea' },
+      { id: 'psoriasis', text: 'Psoriasis', value: 'psoriasis' },
+      { id: 'melasma', text: 'Melasma', value: 'melasma' },
+      { id: 'seborrheic_dermatitis', text: 'Seborrheic Dermatitis', value: 'seborrheic_dermatitis' }
+    ]
+  },
+  {
+    id: 'otherConditions',
+    text: 'Any other skin conditions or allergies?',
+    description: 'Please describe any other conditions, allergies, or specific concerns.',
+    type: 'text' as const,
+    answers: []
+  },
+  {
+    id: 'currentMedications',
+    text: 'Are you currently taking any medications?',
+    description: 'Some medications can affect skin sensitivity and product recommendations.',
+    type: 'single' as const,
+    answers: [
+      { id: 'none', text: 'No medications', value: 'none' },
+      { id: 'birth_control', text: 'Birth control pills', value: 'birth_control' },
+      { id: 'antibiotics', text: 'Antibiotics', value: 'antibiotics' },
+      { id: 'retinoids', text: 'Prescription retinoids', value: 'prescription_retinoids' },
+      { id: 'other', text: 'Other medications', value: 'other_medications' }
+    ]
+  },
+  {
     id: 'ageRange',
     text: 'What is your age range?',
     type: 'single' as const,
     answers: [
+      { id: 'teens', text: '13-19 years', value: '13-19' },
       { id: 'twenties', text: '20-29 years', value: '20-29' },
       { id: 'thirties', text: '30-39 years', value: '30-39' },
       { id: 'forties', text: '40-49 years', value: '40-49' },
       { id: 'fifties-plus', text: '50+ years', value: '50+' }
+    ]
+  },
+  {
+    id: 'gender',
+    text: 'What is your gender?',
+    description: 'This helps us provide more personalized recommendations.',
+    type: 'single' as const,
+    answers: [
+      { id: 'female', text: 'Female', value: 'female' },
+      { id: 'male', text: 'Male', value: 'male' },
+      { id: 'non_binary', text: 'Non-binary', value: 'non_binary' },
+      { id: 'prefer_not_to_say', text: 'Prefer not to say', value: 'prefer_not_to_say' }
     ]
   },
   {
@@ -73,7 +119,48 @@ const questions = [
       { id: 'hot_humid', text: 'Hot and Humid', value: 'hot_humid', description: 'Cities like Mumbai, Chennai, Hyderabad, Kolkata' },
       { id: 'hot_dry', text: 'Hot and Dry', value: 'hot_dry', description: 'Cities like Delhi, Jaipur' },
       { id: 'moderate', text: 'Moderate', value: 'moderate', description: 'Cities like Bangalore, Pune' },
-      { id: 'cold', text: 'Cold', value: 'cold', description: 'Hill stations and northern regions' }
+      { id: 'cold', text: 'Cold', value: 'cold', description: 'Hill stations and northern regions' },
+      { id: 'varied', text: 'Varied/Seasonal', value: 'varied', description: 'Significant seasonal changes' }
+    ]
+  },
+  {
+    id: 'lifestyle',
+    text: 'Which best describes your lifestyle?',
+    description: 'Your daily activities affect your skin\'s needs.',
+    type: 'single' as const,
+    answers: [
+      { id: 'office_indoor', text: 'Office Worker (Mostly Indoors)', value: 'office_indoor' },
+      { id: 'outdoor_active', text: 'Outdoor Worker/Very Active', value: 'outdoor_active' },
+      { id: 'mixed_environment', text: 'Mixed Indoor/Outdoor', value: 'mixed_environment' },
+      { id: 'student', text: 'Student', value: 'student' },
+      { id: 'work_from_home', text: 'Work from Home', value: 'work_from_home' }
+    ]
+  },
+  {
+    id: 'currentProducts',
+    text: 'What products do you currently use?',
+    description: 'Tell us about your current skincare routine.',
+    type: 'multiple' as const,
+    answers: [
+      { id: 'cleanser', text: 'Cleanser', value: 'cleanser' },
+      { id: 'moisturizer', text: 'Moisturizer', value: 'moisturizer' },
+      { id: 'sunscreen', text: 'Sunscreen', value: 'sunscreen' },
+      { id: 'serum', text: 'Serums/Treatments', value: 'serum' },
+      { id: 'toner', text: 'Toner', value: 'toner' },
+      { id: 'exfoliant', text: 'Exfoliants', value: 'exfoliant' },
+      { id: 'none', text: 'No regular routine', value: 'none' }
+    ]
+  },
+  {
+    id: 'routineFrequency',
+    text: 'How often do you follow a skincare routine?',
+    type: 'single' as const,
+    answers: [
+      { id: 'twice_daily', text: 'Twice daily (morning & evening)', value: 'twice_daily' },
+      { id: 'once_daily', text: 'Once daily', value: 'once_daily' },
+      { id: 'few_times_week', text: 'Few times a week', value: 'few_times_week' },
+      { id: 'occasionally', text: 'Occasionally', value: 'occasionally' },
+      { id: 'never', text: 'I don\'t have a routine', value: 'never' }
     ]
   },
   {
@@ -89,13 +176,19 @@ const questions = [
     ]
   },
   {
-    id: 'experience',
-    text: 'How experienced are you with skincare?',
-    type: 'single' as const,
+    id: 'primaryGoals',
+    text: 'What are your main skincare goals?',
+    description: 'Select your top priorities (choose up to 3).',
+    type: 'multiple' as const,
     answers: [
-      { id: 'beginner', text: 'Beginner', value: 'beginner', description: 'New to skincare routines' },
-      { id: 'intermediate', text: 'Intermediate', value: 'intermediate', description: 'Some experience with products' },
-      { id: 'advanced', text: 'Advanced', value: 'advanced', description: 'Very familiar with ingredients and routines' }
+      { id: 'clear_acne', text: 'Clear Acne', value: 'clear_acne' },
+      { id: 'anti_aging', text: 'Anti-Aging', value: 'anti_aging' },
+      { id: 'brighten_skin', text: 'Brighten Skin Tone', value: 'brighten_skin' },
+      { id: 'hydrate_skin', text: 'Hydrate Skin', value: 'hydrate_skin' },
+      { id: 'minimize_pores', text: 'Minimize Pores', value: 'minimize_pores' },
+      { id: 'even_texture', text: 'Even Skin Texture', value: 'even_texture' },
+      { id: 'sun_protection', text: 'Sun Protection', value: 'sun_protection' },
+      { id: 'gentle_care', text: 'Gentle Daily Care', value: 'gentle_care' }
     ]
   }
 ];
@@ -107,96 +200,31 @@ const AssessmentPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [recommendations, setRecommendations] = useState<any>(null);
   const [showResults, setShowResults] = useState(false);
-  const [userLevel, setUserLevel] = useState(1);
-  const [experiencePoints, setExperiencePoints] = useState(0);
-  const [achievements, setAchievements] = useState<any[]>([]);
-  const [challenges, setChallenges] = useState<any[]>([]);
-  const [streakCount, setStreakCount] = useState(0);
   
   const { user } = useAuth();
   const navigate = useNavigate();
   
   const steps = [
-    { id: 1, label: 'Basics' },
-    { id: 2, label: 'Analysis' },
-    { id: 3, label: 'Results' }
+    { id: 1, label: 'Personal Info' },
+    { id: 2, label: 'Skin Analysis' },
+    { id: 3, label: 'Lifestyle' },
+    { id: 4, label: 'Goals & Budget' },
+    { id: 5, label: 'Results' }
   ];
 
   useEffect(() => {
-    if (currentQuestionIndex < 2) {
+    if (currentQuestionIndex < 3) {
       setCurrentStep(1);
-    } else if (currentQuestionIndex < questions.length) {
+    } else if (currentQuestionIndex < 6) {
       setCurrentStep(2);
-    } else {
+    } else if (currentQuestionIndex < 10) {
       setCurrentStep(3);
+    } else if (currentQuestionIndex < questions.length) {
+      setCurrentStep(4);
+    } else {
+      setCurrentStep(5);
     }
   }, [currentQuestionIndex]);
-
-  // Initialize gamification data
-  useEffect(() => {
-    initializeGamificationData();
-  }, [user]);
-
-  const initializeGamificationData = () => {
-    // Mock gamification data - in production, this would come from the database
-    setUserLevel(2);
-    setExperiencePoints(750);
-    setStreakCount(5);
-    
-    setAchievements([
-      {
-        id: 'first_assessment',
-        title: 'Skin Detective',
-        description: 'Complete your first skin assessment',
-        badge: '🎯',
-        points: 100,
-        unlocked: true
-      },
-      {
-        id: 'routine_streak_7',
-        title: 'Week Warrior',
-        description: 'Maintain routine for 7 days',
-        badge: '🔥',
-        points: 200,
-        unlocked: true,
-        progress: 7,
-        maxProgress: 7
-      },
-      {
-        id: 'ingredient_expert',
-        title: 'Ingredient Expert',
-        description: 'Learn about 10 ingredients',
-        badge: '🧪',
-        points: 300,
-        unlocked: false,
-        progress: 6,
-        maxProgress: 10
-      }
-    ]);
-
-    setChallenges([
-      {
-        id: 'weekly_routine',
-        title: 'Weekly Consistency',
-        description: 'Complete routine 7 days in a row',
-        points: 50,
-        deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        progress: 5,
-        maxProgress: 7,
-        completed: false
-      },
-      {
-        id: 'ingredient_learning',
-        title: 'Ingredient Explorer',
-        description: 'Learn about 5 new ingredients',
-        points: 75,
-        deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-        progress: 3,
-        maxProgress: 5,
-        completed: false
-      }
-    ]);
-  };
 
   const handleAnswer = async (questionId: string, value: any) => {
     const newAnswers = { ...answers, [questionId]: value };
@@ -222,9 +250,6 @@ const AssessmentPage: React.FC = () => {
       
       setRecommendations(enhancedRecommendations);
       
-      // Update gamification data
-      setExperiencePoints(prev => prev + 150); // Bonus for completing assessment
-      
       // Save to database if user is authenticated
       if (user) {
         await saveAssessmentToDatabase(assessmentData, enhancedRecommendations);
@@ -234,7 +259,7 @@ const AssessmentPage: React.FC = () => {
       }
       
       setShowResults(true);
-      setCurrentStep(3);
+      setCurrentStep(5);
       
     } catch (error) {
       toast.error('Failed to process assessment. Please try again.');
@@ -253,15 +278,17 @@ const AssessmentPage: React.FC = () => {
           skin_type: assessmentData.skinType,
           skin_concerns: Array.isArray(assessmentData.skinConcerns) ? assessmentData.skinConcerns : [assessmentData.skinConcerns].filter(Boolean),
           skin_sensitivity: assessmentData.skinSensitivity || 3,
+          medical_conditions: Array.isArray(assessmentData.medicalConditions) ? assessmentData.medicalConditions : [assessmentData.medicalConditions].filter(Boolean),
+          other_medical_condition: assessmentData.otherConditions,
+          current_medications: assessmentData.currentMedications,
           age_range: assessmentData.ageRange,
+          gender: assessmentData.gender,
           climate: assessmentData.climate,
-          budget: assessmentData.budget,
-          experience_level: assessmentData.experience,
-          medical_conditions: [],
-          current_medications: [],
-          current_products: [],
-          primary_goals: [],
-          lifestyle_factors: {},
+          lifestyle_factors: [assessmentData.lifestyle].filter(Boolean),
+          current_products: assessmentData.currentProducts || {},
+          routine_frequency: assessmentData.routineFrequency,
+          budget_range: assessmentData.budget,
+          primary_goals: Array.isArray(assessmentData.primaryGoals) ? assessmentData.primaryGoals : [assessmentData.primaryGoals].filter(Boolean),
           assessment_responses: assessmentData,
           recommendations: recommendations,
           completed_at: new Date().toISOString()
@@ -289,16 +316,6 @@ const AssessmentPage: React.FC = () => {
     setRecommendations(null);
     setShowResults(false);
     setCurrentStep(1);
-  };
-
-  const handleChallengeComplete = (challengeId: string) => {
-    setChallenges(prev => prev.map(challenge => 
-      challenge.id === challengeId 
-        ? { ...challenge, completed: true, progress: challenge.maxProgress }
-        : challenge
-    ));
-    setExperiencePoints(prev => prev + 50);
-    toast.success('Challenge completed! +50 XP');
   };
 
   const renderQuestion = () => {
@@ -329,114 +346,12 @@ const AssessmentPage: React.FC = () => {
   const renderResults = () => {
     if (!recommendations) return null;
 
-    // Mock collaborative filtering data
-    const collaborativeRecommendations = [
-      {
-        ingredient: 'niacinamide',
-        ingredientName: 'Niacinamide',
-        collaborativeScore: 0.89,
-        userCount: 156,
-        avgSuccessRate: 0.84,
-        reasoning: [
-          '89% similar users saw significant improvement',
-          'Highly effective for your skin type and concerns',
-          'Well-tolerated by users with similar sensitivity levels'
-        ],
-        similarUsers: [
-          {
-            userId: 'user_001',
-            similarity: 0.91,
-            profile: { skinType: answers.skinType, age: 25, concerns: ['acne', 'oiliness'], climate: answers.climate },
-            successfulProducts: ['niacinamide', 'hyaluronic_acid'],
-            routineSuccess: 0.87,
-            improvementRate: 0.82
-          }
-        ]
-      },
-      {
-        ingredient: 'hyaluronic_acid',
-        ingredientName: 'Hyaluronic Acid',
-        collaborativeScore: 0.82,
-        userCount: 203,
-        avgSuccessRate: 0.91,
-        reasoning: [
-          '82% match with users who have similar hydration needs',
-          'Universally well-tolerated ingredient',
-          'Excellent results for your climate conditions'
-        ],
-        similarUsers: []
-      }
-    ];
-
-    // Mock seasonal adaptation data
-    const seasonalRules = {
-      summer: {
-        priorityAdjustments: { 'oiliness': 25, 'sun_protection': 40, 'pores': 20 },
-        recommendedIngredients: ['niacinamide', 'salicylic_acid', 'zinc_oxide'],
-        avoidIngredients: ['heavy_oils', 'occlusive_moisturizers'],
-        routineModifications: {
-          morning: ['lightweight_moisturizer', 'antioxidant_serum', 'broad_spectrum_spf'],
-          evening: ['gentle_cleanser', 'treatment_serum']
-        }
-      },
-      winter: {
-        priorityAdjustments: { 'dryness': 30, 'sensitivity': 20, 'barrier_repair': 25 },
-        recommendedIngredients: ['ceramides', 'hyaluronic_acid', 'squalane'],
-        avoidIngredients: ['strong_acids', 'high_concentration_retinoids'],
-        routineModifications: {
-          morning: ['rich_moisturizer', 'barrier_repair_serum'],
-          evening: ['nourishing_oil', 'overnight_mask']
-        }
-      },
-      monsoon: {
-        priorityAdjustments: { 'fungal_protection': 35, 'humidity_adaptation': 30 },
-        recommendedIngredients: ['tea_tree_oil', 'zinc_pyrithione'],
-        avoidIngredients: ['heavy_creams'],
-        routineModifications: {
-          morning: ['antimicrobial_cleanser'],
-          evening: ['thorough_cleansing']
-        }
-      }
-    };
-
     return (
       <motion.div 
-        className="max-w-7xl mx-auto space-y-12"
+        className="max-w-6xl mx-auto space-y-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        {/* Gamification Dashboard */}
-        <GamificationDashboard
-          userId={user?.id || 'anonymous'}
-          currentLevel={userLevel}
-          experiencePoints={experiencePoints}
-          achievements={achievements}
-          challenges={challenges}
-          streakCount={streakCount}
-          onChallengeComplete={handleChallengeComplete}
-        />
-
-        {/* Collaborative Filtering */}
-        <CollaborativeFiltering
-          userId={user?.id || 'anonymous'}
-          userProfile={recommendations.user_profile}
-          recommendations={collaborativeRecommendations}
-          onIngredientSelect={(ingredient) => {
-            toast.success(`Added ${ingredient.replace('_', ' ')} to your routine!`);
-          }}
-        />
-
-        {/* Seasonal Adaptation */}
-        <SeasonalAdaptation
-          currentSeason="summer"
-          climate={answers.climate || 'moderate'}
-          userProfile={recommendations.user_profile}
-          seasonalRules={seasonalRules}
-          onSeasonalChange={(season) => {
-            toast.success(`Switched to ${season} recommendations`);
-          }}
-        />
-
         {/* Enhanced Recommendations Display */}
         <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/50">
           <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
@@ -586,24 +501,20 @@ const AssessmentPage: React.FC = () => {
             </div>
           )}
 
-          {/* Gamification Elements in Results */}
-          <div className="bg-gradient-to-r from-success-50 to-success-100 rounded-2xl p-6 border border-success-200">
-            <h3 className="text-lg font-bold text-success-800 mb-4">🎉 Assessment Rewards</h3>
-            <div className="grid md:grid-cols-3 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-success-600">+150 XP</div>
-                <div className="text-sm text-success-700">Assessment Bonus</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-success-600">🏆</div>
-                <div className="text-sm text-success-700">Achievement Unlocked</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-success-600">Level {userLevel}</div>
-                <div className="text-sm text-success-700">Current Level</div>
+          {/* Warnings */}
+          {recommendations.warnings && recommendations.warnings.length > 0 && (
+            <div className="mb-8 bg-gradient-to-r from-warning-50 to-warning-100 rounded-2xl p-6 border border-warning-200">
+              <h3 className="text-lg font-bold text-warning-800 mb-4">⚠️ Important Notes</h3>
+              <div className="space-y-2">
+                {recommendations.warnings.map((warning: any, index: number) => (
+                  <div key={index} className="flex items-start space-x-2">
+                    <span className="text-warning-600">•</span>
+                    <p className="text-sm text-warning-700">{warning.message || warning}</p>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Action Buttons */}
@@ -658,9 +569,9 @@ const AssessmentPage: React.FC = () => {
             />
           </motion.div>
           <h3 className="text-xl font-semibold mb-2 bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
-            Generating Your Enhanced AI Recommendations
+            Generating Your Personalized Recommendations
           </h3>
-          <p className="text-neutral-600">Analyzing with machine learning algorithms...</p>
+          <p className="text-neutral-600">Analyzing your responses with our advanced algorithm...</p>
         </motion.div>
       </div>
     );
@@ -678,7 +589,7 @@ const AssessmentPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                Enhanced AI Skin Assessment
+                Complete Skin Assessment
               </motion.h1>
               <motion.p 
                 className="text-neutral-600 text-lg"
@@ -686,7 +597,7 @@ const AssessmentPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
               >
-                Get personalized recommendations powered by machine learning and collaborative filtering
+                Answer 13 comprehensive questions to get personalized skincare recommendations
               </motion.p>
             </div>
             

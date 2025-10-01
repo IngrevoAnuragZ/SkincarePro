@@ -1856,7 +1856,7 @@ class DynamicSkincareRecommendationEngine {
         australianMade: true,
         weeklyUse: true
       },
-      'go : '₹';
+      // Currency symbol removed - invalid syntax
 
     const totalCost = allProducts.reduce((sum, rec) => sum + (rec.price || 0), 0);
 

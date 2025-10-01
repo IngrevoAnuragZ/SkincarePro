@@ -76,10 +76,10 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         break;
       case 'budget':
         setSliderLabel(
-          value === 1 ? 'Budget-Friendly (₹500 or less)' :
-          value === 2 ? 'Mid-Range (₹500-1500)' :
-          value === 3 ? 'Premium (₹1500-3000)' :
-          'Luxury (₹3000+)'
+          value === 1 ? 'Budget-Friendly' :
+          value === 2 ? 'Mid-Range' :
+          value === 3 ? 'Premium' :
+          'Luxury'
         );
         break;
       case 'experience':

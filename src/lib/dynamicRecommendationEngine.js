@@ -4,6 +4,7 @@
 class DynamicSkincareRecommendationEngine {
   constructor() {
     this.productDatabase = this.initializeProductDatabase();
+    this.countryDatabase = this.initializeCountryDatabase();
     this.ruleMatrix = this.initializeRuleMatrix();
     this.conflictMatrix = this.initializeConflictMatrix();
     this.climateDatabase = this.initializeClimateDatabase();
@@ -23,29 +24,32 @@ class DynamicSkincareRecommendationEngine {
       // Step 2: Create comprehensive user profile
       const userProfile = this.createUserProfile(normalizedData);
       
+      // Step 2.5: Apply country-specific adaptations
+      const countryAdaptedProfile = this.applyCountryAdaptations(userProfile);
+      
       // Step 3: Generate base recommendations using dynamic rule matrix
-      const baseRecommendations = this.generateBaseRecommendations(userProfile);
+      const baseRecommendations = this.generateBaseRecommendations(countryAdaptedProfile);
       
       // Step 4: Apply strict budget filtering
-      const budgetFilteredRecs = this.applyBudgetFiltering(baseRecommendations, userProfile);
+      const budgetFilteredRecs = this.applyBudgetFiltering(baseRecommendations, countryAdaptedProfile);
       
       // Step 5: Apply medical condition constraints
-      const medicallyFilteredRecs = this.applyMedicalConstraints(budgetFilteredRecs, userProfile);
+      const medicallyFilteredRecs = this.applyMedicalConstraints(budgetFilteredRecs, countryAdaptedProfile);
       
       // Step 6: Apply conflict resolution
       const conflictResolvedRecs = this.resolveIngredientConflicts(medicallyFilteredRecs);
       
       // Step 7: Score and rank recommendations dynamically
-      const scoredRecommendations = this.scoreAndRankRecommendations(conflictResolvedRecs, userProfile);
+      const scoredRecommendations = this.scoreAndRankRecommendations(conflictResolvedRecs, countryAdaptedProfile);
       
       // Step 8: Personalize based on experience level and preferences
-      const personalizedRecs = this.personalizeRecommendations(scoredRecommendations, userProfile);
+      const personalizedRecs = this.personalizeRecommendations(scoredRecommendations, countryAdaptedProfile);
       
       // Step 9: Structure final output with detailed benefits
-      const finalRecommendations = this.structureRecommendations(personalizedRecs, userProfile);
+      const finalRecommendations = this.structureRecommendations(personalizedRecs, countryAdaptedProfile);
       
       // Step 10: Add comprehensive routine, warnings, and benefits
-      const completeResponse = this.addRoutineWarningsAndBenefits(finalRecommendations, userProfile);
+      const completeResponse = this.addRoutineWarningsAndBenefits(finalRecommendations, countryAdaptedProfile);
       
       return this.sanitizeResponse(completeResponse);
       
@@ -55,9 +59,491 @@ class DynamicSkincareRecommendationEngine {
     }
   }
 
+  // ============ COUNTRY ADAPTATIONS ============
+  applyCountryAdaptations(userProfile) {
+    const country = userProfile.country || 'india';
+    const countryData = this.countryDatabase[country];
+    
+    if (!countryData) {
+      console.warn(`Country ${country} not found, using default settings`);
+      return userProfile;
+    }
+
+    // Apply country-specific priority adjustments
+    const adaptedProfile = { ...userProfile };
+    
+    // Australia-specific adaptations
+    if (country === 'australia') {
+      // Increase sun protection priority due to harsh UV
+      if (!adaptedProfile.concerns.includes('sun_protection')) {
+        adaptedProfile.concerns.unshift('sun_protection');
+      }
+      
+      // Adjust for dry climate in many Australian regions
+      if (adaptedProfile.climate === 'arid' && !adaptedProfile.concerns.includes('dryness_dehydration')) {
+        adaptedProfile.concerns.push('dryness_dehydration');
+      }
+      
+      // Prioritize local brands for better availability
+      adaptedProfile.preferLocalBrands = true;
+      adaptedProfile.localBrands = countryData.localBrands;
+    }
+    
+    // India-specific adaptations
+    if (country === 'india') {
+      // Prioritize oil control in humid climates
+      if (adaptedProfile.climate === 'hot_humid' && !adaptedProfile.concerns.includes('excess_oil_shine')) {
+        adaptedProfile.concerns.push('excess_oil_shine');
+      }
+    }
+    
+    adaptedProfile.countryData = countryData;
+    return adaptedProfile;
+  }
   // ============ ENHANCED PRODUCT DATABASE ============
   initializeProductDatabase() {
     return {
+      // ============ AUSTRALIAN PRODUCTS ============
+      
+      // BUDGET CLEANSERS (Under AUD $30)
+      'qv_gentle_wash': {
+        name: 'QV Gentle Wash',
+        category: 'cleanser',
+        price: 12.99,
+        currency: 'AUD',
+        suitableFor: ['sensitive', 'dry', 'normal'],
+        addresses: ['basic_cleansing', 'sensitivity_redness'],
+        strength: 'gentle',
+        brand: 'QV',
+        size: '350ml',
+        conflicts: [],
+        country: 'australia',
+        benefits: ['Soap-free formula', 'pH balanced', 'Dermatologist recommended'],
+        availability: 'Chemist Warehouse, Priceline, Woolworths'
+      },
+      'cetaphil_gentle_cleanser_au': {
+        name: 'Cetaphil Gentle Skin Cleanser',
+        category: 'cleanser',
+        price: 16.99,
+        currency: 'AUD',
+        suitableFor: ['sensitive', 'dry', 'normal'],
+        addresses: ['basic_cleansing', 'sensitivity_redness'],
+        strength: 'gentle',
+        brand: 'Cetaphil',
+        size: '500ml',
+        conflicts: [],
+        country: 'australia',
+        benefits: ['Non-comedogenic', 'Fragrance-free', 'Maintains skin barrier'],
+        availability: 'Chemist Warehouse, Priceline, Coles'
+      },
+      'sukin_foaming_cleanser': {
+        name: 'Sukin Foaming Facial Cleanser',
+        category: 'cleanser',
+        price: 9.95,
+        currency: 'AUD',
+        suitableFor: ['normal', 'combination', 'oily'],
+        addresses: ['basic_cleansing', 'excess_oil_shine'],
+        strength: 'gentle',
+        brand: 'Sukin',
+        size: '125ml',
+        conflicts: [],
+        country: 'australia',
+        benefits: ['Natural ingredients', 'Chamomile & Aloe Vera', 'Australian made'],
+        availability: 'Woolworths, Coles, Priceline'
+      },
+      'benzac_daily_cleanser': {
+        name: 'Benzac Daily Facial Foam Cleanser',
+        category: 'cleanser',
+        price: 14.99,
+        currency: 'AUD',
+        suitableFor: ['oily', 'combination', 'acne_prone'],
+        addresses: ['acne_breakouts', 'excess_oil_shine'],
+        strength: 'moderate',
+        brand: 'Benzac',
+        size: '130ml',
+        conflicts: [],
+        country: 'australia',
+        activeIngredients: ['salicylic_acid'],
+        benefits: ['Oil-free formula', 'Unclogs pores', 'Prevents breakouts'],
+        availability: 'Chemist Warehouse, Priceline'
+      },
+
+      // MID-RANGE CLEANSERS (AUD $30-80)
+      'aesop_purifying_cleanser': {
+        name: 'Aesop Purifying Facial Exfoliant Paste',
+        category: 'cleanser',
+        price: 45.00,
+        currency: 'AUD',
+        suitableFor: ['normal', 'oily', 'combination'],
+        addresses: ['basic_cleansing', 'uneven_texture'],
+        strength: 'moderate',
+        brand: 'Aesop',
+        size: '75ml',
+        conflicts: [],
+        country: 'australia',
+        benefits: ['Quartz & Lactic Acid', 'Australian botanicals', 'Luxury formulation'],
+        availability: 'Aesop stores, David Jones, Myer'
+      },
+      'la_roche_posay_toleriane_au': {
+        name: 'La Roche-Posay Toleriane Caring Wash',
+        category: 'cleanser',
+        price: 32.99,
+        currency: 'AUD',
+        suitableFor: ['sensitive', 'dry', 'normal'],
+        addresses: ['basic_cleansing', 'sensitivity_redness'],
+        strength: 'gentle',
+        brand: 'La Roche-Posay',
+        size: '200ml',
+        conflicts: [],
+        country: 'australia',
+        benefits: ['Thermal spring water', 'Soap-free', 'Allergy tested'],
+        availability: 'Chemist Warehouse, Priceline'
+      },
+
+      // BUDGET ACTIVES (Under AUD $30)
+      'the_ordinary_niacinamide_au': {
+        name: 'The Ordinary Niacinamide 10% + Zinc 1%',
+        category: 'active',
+        price: 9.90,
+        currency: 'AUD',
+        suitableFor: ['all'],
+        addresses: ['excess_oil_shine', 'large_pores', 'acne_breakouts'],
+        strength: 'moderate',
+        brand: 'The Ordinary',
+        size: '30ml',
+        conflicts: [],
+        country: 'australia',
+        activeIngredients: ['niacinamide', 'zinc'],
+        requiresExperience: 'beginner',
+        benefits: ['Controls sebum', 'Minimizes pores', 'Reduces blemishes'],
+        availability: 'Priceline, Adore Beauty, Mecca'
+      },
+      'the_ordinary_hyaluronic_au': {
+        name: 'The Ordinary Hyaluronic Acid 2% + B5',
+        category: 'hydrating',
+        price: 9.90,
+        currency: 'AUD',
+        suitableFor: ['all'],
+        addresses: ['dryness_dehydration', 'fine_lines_wrinkles'],
+        strength: 'gentle',
+        brand: 'The Ordinary',
+        size: '30ml',
+        conflicts: [],
+        country: 'australia',
+        activeIngredients: ['hyaluronic_acid'],
+        requiresExperience: 'beginner',
+        benefits: ['Intense hydration', 'Plumps skin', 'Multiple molecular weights'],
+        availability: 'Priceline, Adore Beauty, Mecca'
+      },
+      'benzac_spot_treatment': {
+        name: 'Benzac AC Gel 5%',
+        category: 'active',
+        price: 19.99,
+        currency: 'AUD',
+        suitableFor: ['oily', 'acne_prone'],
+        addresses: ['acne_breakouts'],
+        strength: 'strong',
+        brand: 'Benzac',
+        size: '60g',
+        conflicts: ['retinoids'],
+        country: 'australia',
+        activeIngredients: ['benzoyl_peroxide'],
+        requiresExperience: 'intermediate',
+        benefits: ['Kills acne bacteria', 'Reduces inflammation', 'Prevents new breakouts'],
+        availability: 'Chemist Warehouse, Priceline'
+      },
+
+      // MID-RANGE ACTIVES (AUD $30-100)
+      'paula_choice_bha_au': {
+        name: 'Paula\'s Choice 2% BHA Liquid Exfoliant',
+        category: 'active',
+        price: 49.00,
+        currency: 'AUD',
+        suitableFor: ['oily', 'combination', 'acne_prone'],
+        addresses: ['acne_breakouts', 'large_pores', 'uneven_texture'],
+        strength: 'moderate',
+        brand: 'Paula\'s Choice',
+        size: '30ml',
+        conflicts: ['retinoids'],
+        country: 'australia',
+        activeIngredients: ['salicylic_acid'],
+        requiresExperience: 'intermediate',
+        benefits: ['Unclogs pores', 'Smooths texture', 'Reduces blackheads'],
+        availability: 'Adore Beauty, Mecca'
+      },
+      'alpha_h_liquid_gold': {
+        name: 'Alpha-H Liquid Gold',
+        category: 'active',
+        price: 69.95,
+        currency: 'AUD',
+        suitableFor: ['normal', 'combination', 'oily'],
+        addresses: ['fine_lines_wrinkles', 'uneven_texture', 'dark_spots_hyperpigmentation'],
+        strength: 'moderate',
+        brand: 'Alpha-H',
+        size: '50ml',
+        conflicts: ['retinoids'],
+        country: 'australia',
+        activeIngredients: ['glycolic_acid'],
+        requiresExperience: 'intermediate',
+        benefits: ['Australian brand', 'Glycolic acid exfoliation', 'Silk proteins'],
+        availability: 'Mecca, David Jones, Adore Beauty'
+      },
+      'aspect_vitamin_c': {
+        name: 'Aspect Dr Active C Serum',
+        category: 'active',
+        price: 89.00,
+        currency: 'AUD',
+        suitableFor: ['normal', 'dry', 'combination'],
+        addresses: ['dark_spots_hyperpigmentation', 'fine_lines_wrinkles'],
+        strength: 'moderate',
+        brand: 'Aspect Dr',
+        size: '30ml',
+        conflicts: ['retinoids'],
+        country: 'australia',
+        activeIngredients: ['vitamin_c'],
+        requiresExperience: 'intermediate',
+        benefits: ['Australian dermatologist brand', 'Stable vitamin C', 'Antioxidant protection'],
+        availability: 'Adore Beauty, selected clinics'
+      },
+
+      // PREMIUM ACTIVES (AUD $100-200)
+      'synergie_vitamin_c': {
+        name: 'Synergie Skin VitaC Serum',
+        category: 'active',
+        price: 125.00,
+        currency: 'AUD',
+        suitableFor: ['all'],
+        addresses: ['dark_spots_hyperpigmentation', 'fine_lines_wrinkles'],
+        strength: 'strong',
+        brand: 'Synergie Skin',
+        size: '30ml',
+        conflicts: ['retinoids'],
+        country: 'australia',
+        activeIngredients: ['vitamin_c'],
+        requiresExperience: 'intermediate',
+        benefits: ['Australian cosmeceutical', '20% Vitamin C', 'Dermatologist formulated'],
+        availability: 'Adore Beauty, selected clinics'
+      },
+      'rationale_retinol': {
+        name: 'Rationale Essential Six Serum',
+        category: 'active',
+        price: 180.00,
+        currency: 'AUD',
+        suitableFor: ['normal', 'combination', 'oily'],
+        addresses: ['fine_lines_wrinkles', 'acne_breakouts', 'uneven_texture'],
+        strength: 'strong',
+        brand: 'Rationale',
+        size: '30ml',
+        conflicts: ['vitamin_c', 'bha'],
+        country: 'australia',
+        activeIngredients: ['retinol'],
+        requiresExperience: 'advanced',
+        contraindications: ['pregnancy', 'nursing'],
+        benefits: ['Australian luxury brand', 'Encapsulated retinol', 'Clinical strength'],
+        availability: 'Rationale clinics, selected spas'
+      },
+
+      // BUDGET MOISTURIZERS (Under AUD $25)
+      'qv_cream': {
+        name: 'QV Cream',
+        category: 'moisturizer',
+        price: 8.99,
+        currency: 'AUD',
+        suitableFor: ['dry', 'sensitive', 'normal'],
+        addresses: ['dryness_dehydration', 'sensitivity_redness'],
+        strength: 'gentle',
+        brand: 'QV',
+        size: '100g',
+        conflicts: [],
+        country: 'australia',
+        benefits: ['Fragrance-free', 'Suitable for eczema', 'Australian made'],
+        availability: 'Chemist Warehouse, Woolworths, Coles'
+      },
+      'sukin_facial_moisturiser': {
+        name: 'Sukin Facial Moisturiser',
+        category: 'moisturizer',
+        price: 9.95,
+        currency: 'AUD',
+        suitableFor: ['normal', 'combination', 'dry'],
+        addresses: ['basic_hydration', 'dryness_dehydration'],
+        strength: 'gentle',
+        brand: 'Sukin',
+        size: '125ml',
+        conflicts: [],
+        country: 'australia',
+        benefits: ['Natural ingredients', 'Rosehip & Sesame oils', 'Vegan & cruelty-free'],
+        availability: 'Woolworths, Coles, Priceline'
+      },
+      'hamilton_everyday_face': {
+        name: 'Hamilton Everyday Face SPF 50+',
+        category: 'moisturizer_spf',
+        price: 19.95,
+        currency: 'AUD',
+        suitableFor: ['all'],
+        addresses: ['basic_hydration', 'sun_protection'],
+        strength: 'gentle',
+        brand: 'Hamilton',
+        size: '75ml',
+        conflicts: [],
+        country: 'australia',
+        spf: 50,
+        benefits: ['Moisturizer + SPF combo', 'Australian sun protection', 'Non-greasy'],
+        availability: 'Chemist Warehouse, Priceline'
+      },
+
+      // MID-RANGE MOISTURIZERS (AUD $25-80)
+      'cerave_daily_moisturizer_au': {
+        name: 'CeraVe Daily Moisturising Lotion',
+        category: 'moisturizer',
+        price: 24.99,
+        currency: 'AUD',
+        suitableFor: ['normal', 'dry', 'sensitive'],
+        addresses: ['dryness_dehydration', 'sensitivity_redness'],
+        strength: 'gentle',
+        brand: 'CeraVe',
+        size: '236ml',
+        conflicts: [],
+        country: 'australia',
+        activeIngredients: ['ceramides', 'hyaluronic_acid'],
+        benefits: ['MVE technology', '24-hour hydration', 'Dermatologist developed'],
+        availability: 'Chemist Warehouse, Priceline'
+      },
+      'go_to_face_hero': {
+        name: 'Go-To Face Hero',
+        category: 'moisturizer',
+        price: 45.00,
+        currency: 'AUD',
+        suitableFor: ['normal', 'combination', 'oily'],
+        addresses: ['basic_hydration'],
+        strength: 'gentle',
+        brand: 'Go-To',
+        size: '60ml',
+        conflicts: [],
+        country: 'australia',
+        benefits: ['Australian indie brand', 'Lightweight formula', 'Kakadu plum extract'],
+        availability: 'Mecca, Adore Beauty, Go-To website'
+      },
+      'aspect_hydrating_serum': {
+        name: 'Aspect Dr Hyaluronic Serum',
+        category: 'hydrating',
+        price: 75.00,
+        currency: 'AUD',
+        suitableFor: ['all'],
+        addresses: ['dryness_dehydration', 'fine_lines_wrinkles'],
+        strength: 'gentle',
+        brand: 'Aspect Dr',
+        size: '30ml',
+        conflicts: [],
+        country: 'australia',
+        activeIngredients: ['hyaluronic_acid'],
+        benefits: ['Clinical grade', 'Multiple molecular weights', 'Australian dermatologist brand'],
+        availability: 'Adore Beauty, selected clinics'
+      },
+
+      // PREMIUM MOISTURIZERS (AUD $80-200)
+      'rationale_b3_serum': {
+        name: 'Rationale B3 Serum',
+        category: 'active',
+        price: 150.00,
+        currency: 'AUD',
+        suitableFor: ['all'],
+        addresses: ['excess_oil_shine', 'large_pores', 'sensitivity_redness'],
+        strength: 'moderate',
+        brand: 'Rationale',
+        size: '30ml',
+        conflicts: [],
+        country: 'australia',
+        activeIngredients: ['niacinamide'],
+        benefits: ['15% Niacinamide', 'Australian luxury', 'Clinical strength'],
+        availability: 'Rationale clinics, selected spas'
+      },
+      'synergie_vitamin_b': {
+        name: 'Synergie Skin VitaB3 Serum',
+        category: 'active',
+        price: 95.00,
+        currency: 'AUD',
+        suitableFor: ['all'],
+        addresses: ['excess_oil_shine', 'large_pores', 'acne_breakouts'],
+        strength: 'moderate',
+        brand: 'Synergie Skin',
+        size: '30ml',
+        conflicts: [],
+        country: 'australia',
+        activeIngredients: ['niacinamide'],
+        benefits: ['Australian cosmeceutical', '12% Niacinamide', 'Dermatologist tested'],
+        availability: 'Adore Beauty, selected clinics'
+      },
+
+      // AUSTRALIAN SUNSCREENS (Essential for harsh Australian sun)
+      'cancer_council_face_day_wear': {
+        name: 'Cancer Council Face Day Wear Moisturiser SPF 50+',
+        category: 'sunscreen',
+        price: 14.95,
+        currency: 'AUD',
+        suitableFor: ['all'],
+        addresses: ['sun_protection', 'basic_hydration'],
+        strength: 'gentle',
+        brand: 'Cancer Council',
+        size: '75ml',
+        conflicts: [],
+        country: 'australia',
+        spf: 50,
+        essential: true,
+        benefits: ['Australian Cancer Council approved', 'Moisturizer + SPF', '4 hours water resistant'],
+        availability: 'Woolworths, Coles, Chemist Warehouse'
+      },
+      'hamilton_face_sunscreen': {
+        name: 'Hamilton Everyday Face SPF 50+',
+        category: 'sunscreen',
+        price: 19.95,
+        currency: 'AUD',
+        suitableFor: ['all'],
+        addresses: ['sun_protection'],
+        strength: 'gentle',
+        brand: 'Hamilton',
+        size: '75ml',
+        conflicts: [],
+        country: 'australia',
+        spf: 50,
+        essential: true,
+        benefits: ['Fragrance-free', 'Non-comedogenic', 'Australian made'],
+        availability: 'Chemist Warehouse, Priceline'
+      },
+      'invisible_zinc_face_fluid': {
+        name: 'Invisible Zinc Face & Body SPF 50+',
+        category: 'sunscreen',
+        price: 29.95,
+        currency: 'AUD',
+        suitableFor: ['sensitive', 'all'],
+        addresses: ['sun_protection', 'sensitivity_redness'],
+        strength: 'gentle',
+        brand: 'Invisible Zinc',
+        size: '50ml',
+        conflicts: [],
+        country: 'australia',
+        spf: 50,
+        essential: true,
+        activeIngredients: ['zinc_oxide'],
+        benefits: ['100% mineral', 'Reef safe', 'Australian owned'],
+        availability: 'Chemist Warehouse, Priceline, Mecca'
+      },
+      'ultra_violette_supreme_screen': {
+        name: 'Ultra Violette Supreme Screen SPF 50+',
+        category: 'sunscreen',
+        price: 42.00,
+        currency: 'AUD',
+        suitableFor: ['all'],
+        addresses: ['sun_protection'],
+        strength: 'gentle',
+        brand: 'Ultra Violette',
+        size: '60ml',
+        conflicts: [],
+        country: 'australia',
+        spf: 50,
+        essential: true,
+        benefits: ['Australian indie brand', 'Invisible finish', 'Antioxidant complex'],
+        availability: 'Mecca, Adore Beauty, Ultra Violette website'
+      },
       // BUDGET CLEANSERS (Under ₹500)
       'cetaphil_gentle_cleanser': {
         name: 'Cetaphil Gentle Skin Cleanser',
@@ -300,6 +786,52 @@ class DynamicSkincareRecommendationEngine {
 
       // MID-RANGE SUNSCREENS (₹500-1500)
       'la_roche_posay_sunscreen': {
+  // ============ COUNTRY DATABASE ============
+  initializeCountryDatabase() {
+    return {
+      'australia': {
+        currency: 'AUD',
+        climateTypes: ['temperate', 'tropical', 'arid', 'mediterranean'],
+        sunIntensity: 'very_high',
+        commonConcerns: ['sun_damage', 'dehydration', 'premature_aging'],
+        priorityIngredients: ['zinc_oxide', 'vitamin_c', 'hyaluronic_acid'],
+        availableRetailers: ['Chemist Warehouse', 'Priceline', 'Mecca', 'Adore Beauty', 'Woolworths', 'Coles'],
+        localBrands: ['Aesop', 'Go-To', 'Alpha-H', 'Synergie Skin', 'Rationale', 'Aspect Dr', 'Ultra Violette', 'Sukin', 'QV'],
+        budgetRanges: {
+          'budget-friendly': 30,
+          'mid-range': 80,
+          'premium': 150,
+          'luxury': 300
+        },
+        specialConsiderations: [
+          'Harsh UV radiation requires SPF 50+ daily',
+          'Dry climate in many regions increases dehydration risk',
+          'Strong focus on sun protection and antioxidants',
+          'Local brands often formulated for Australian conditions'
+        ]
+      },
+      'india': {
+        currency: 'INR',
+        climateTypes: ['hot_humid', 'hot_dry', 'moderate', 'cold', 'varied'],
+        sunIntensity: 'high',
+        commonConcerns: ['excess_oil_shine', 'acne_breakouts', 'hyperpigmentation'],
+        priorityIngredients: ['niacinamide', 'salicylic_acid', 'vitamin_c'],
+        availableRetailers: ['Nykaa', 'Amazon', 'Local pharmacies', 'Myntra'],
+        localBrands: ['Minimalist', 'Plum', 'Mamaearth', 'Dot & Key'],
+        budgetRanges: {
+          'budget-friendly': 500,
+          'mid-range': 1500,
+          'premium': 3000,
+          'luxury': 5000
+        },
+        specialConsiderations: [
+          'High humidity in coastal areas requires oil-free formulations',
+          'Pollution concerns need antioxidant protection',
+          'Budget-conscious market with effective affordable options'
+        ]
+      }
+    };
+  }
         name: 'La Roche-Posay Anthelios Sunscreen SPF 50',
         category: 'sunscreen',
         price: 899,
@@ -333,6 +865,37 @@ class DynamicSkincareRecommendationEngine {
   // ============ ENHANCED CLIMATE DATABASE ============
   initializeClimateDatabase() {
     return {
+      // AUSTRALIAN CLIMATES
+      'temperate': {
+        cities: ['Melbourne', 'Sydney', 'Adelaide', 'Hobart'],
+        characteristics: ['Mild temperatures', 'Seasonal variation', 'Moderate humidity'],
+        recommendations: ['versatile_products', 'seasonal_adjustments', 'antioxidant_protection'],
+        avoid: ['heavy_winter_creams_in_summer'],
+        priorityIngredients: ['vitamin_c', 'hyaluronic_acid', 'niacinamide']
+      },
+      'tropical': {
+        cities: ['Brisbane', 'Cairns', 'Darwin', 'Gold Coast'],
+        characteristics: ['High humidity', 'Intense UV', 'Year-round warmth'],
+        recommendations: ['lightweight_textures', 'high_spf', 'oil_free_formulas'],
+        avoid: ['heavy_creams', 'occlusive_ingredients'],
+        priorityIngredients: ['zinc_oxide', 'niacinamide', 'salicylic_acid']
+      },
+      'arid': {
+        cities: ['Perth', 'Alice Springs', 'Broken Hill'],
+        characteristics: ['Low humidity', 'Intense sun', 'Dry conditions'],
+        recommendations: ['intensive_hydration', 'barrier_repair', 'high_spf'],
+        avoid: ['alcohol_based_products', 'over_exfoliation'],
+        priorityIngredients: ['hyaluronic_acid', 'ceramides', 'zinc_oxide']
+      },
+      'mediterranean': {
+        cities: ['Perth suburbs', 'Adelaide hills'],
+        characteristics: ['Dry summers', 'Mild winters', 'Seasonal variation'],
+        recommendations: ['seasonal_routine_changes', 'antioxidant_protection'],
+        avoid: [],
+        priorityIngredients: ['vitamin_c', 'retinol', 'hyaluronic_acid']
+      },
+      
+      // EXISTING INDIAN CLIMATES
       'hot_humid': {
         cities: ['Mumbai', 'Chennai', 'Kolkata', 'Hyderabad', 'Bangalore', 'Kochi', 'Goa'],
         characteristics: ['High humidity', 'Excessive sweating', 'Fungal concerns'],
@@ -444,15 +1007,19 @@ class DynamicSkincareRecommendationEngine {
 
   // ============ STRICT BUDGET FILTERING ============
   applyBudgetFiltering(recommendations, userProfile) {
+    const country = userProfile.country || 'india';
+    const countryData = this.countryDatabase[country];
+    
     const budgetLimits = {
-      'budget-friendly': 500,
-      'mid-range': 1500,
-      'premium': 3000,
-      'luxury': 10000
+      'budget-friendly': countryData?.budgetRanges?.['budget-friendly'] || 500,
+      'mid-range': countryData?.budgetRanges?.['mid-range'] || 1500,
+      'premium': countryData?.budgetRanges?.['premium'] || 3000,
+      'luxury': countryData?.budgetRanges?.['luxury'] || 10000
     };
 
-    const maxBudget = budgetLimits[userProfile.budget] || 500;
-    console.log(`💰 Applying budget filter: ₹${maxBudget}`);
+    const maxBudget = budgetLimits[userProfile.budget] || budgetLimits['budget-friendly'];
+    const currency = countryData?.currency || 'INR';
+    console.log(`💰 Applying budget filter: ${currency} ${maxBudget}`);
 
     const filteredRecommendations = [];
 
@@ -464,15 +1031,20 @@ class DynamicSkincareRecommendationEngine {
         return;
       }
 
+      // Filter by country availability
+      if (product.country && product.country !== country) {
+        return; // Skip products not available in user's country
+      }
       if (product.price <= maxBudget) {
         filteredRecommendations.push({
           ...rec,
           price: product.price,
+          currency: product.currency || currency,
           withinBudget: true
         });
       } else {
         // Try to find budget alternative
-        const alternative = this.findBudgetAlternative(rec, maxBudget);
+        const alternative = this.findBudgetAlternative(rec, maxBudget, country);
         if (alternative) {
           filteredRecommendations.push({
             ...alternative,
@@ -480,7 +1052,7 @@ class DynamicSkincareRecommendationEngine {
             originalProduct: rec.productId
           });
         } else {
-          console.log(`💸 No budget alternative found for ${product.name} (₹${product.price})`);
+          console.log(`💸 No budget alternative found for ${product.name} (${currency} ${product.price})`);
         }
       }
     });
@@ -489,7 +1061,7 @@ class DynamicSkincareRecommendationEngine {
     return filteredRecommendations;
   }
 
-  findBudgetAlternative(originalRec, maxBudget) {
+  findBudgetAlternative(originalRec, maxBudget, country) {
     const originalProduct = this.productDatabase[originalRec.productId];
     if (!originalProduct) return null;
 
@@ -498,6 +1070,7 @@ class DynamicSkincareRecommendationEngine {
       .filter(([id, product]) => 
         product.category === originalProduct.category &&
         product.price <= maxBudget &&
+        (!product.country || product.country === country) &&
         id !== originalRec.productId
       )
       .sort((a, b) => {
@@ -515,6 +1088,7 @@ class DynamicSkincareRecommendationEngine {
       productId: alternativeId,
       reasoning: `Budget-friendly alternative to ${originalProduct.name}`,
       price: alternativeProduct.price,
+      currency: alternativeProduct.currency,
       budgetSavings: originalProduct.price - alternativeProduct.price
     };
   }
@@ -547,12 +1121,16 @@ class DynamicSkincareRecommendationEngine {
     console.log('🔍 Generating base recommendations for profile:', userProfile);
     
     const recommendations = [];
+    const country = userProfile.country || 'india';
     
     // 1. Essential products (always include)
     recommendations.push(...this.getEssentialProducts(userProfile));
     
     // 2. Climate-specific products (NEW)
     recommendations.push(...this.getClimateSpecificProducts(userProfile));
+    
+    // 2.5. Country-specific products (NEW)
+    recommendations.push(...this.getCountrySpecificProducts(userProfile));
     
     // 3. Skin type specific products
     recommendations.push(...this.getSkinTypeProducts(userProfile));
@@ -567,6 +1145,44 @@ class DynamicSkincareRecommendationEngine {
     return this.deduplicateRecommendations(recommendations);
   }
 
+  getCountrySpecificProducts(userProfile) {
+    const country = userProfile.country || 'india';
+    const countryProducts = [];
+    
+    // Australia-specific recommendations
+    if (country === 'australia') {
+      // High SPF is essential in Australia
+      countryProducts.push({
+        productId: 'cancer_council_face_day_wear',
+        reasoning: 'Essential high SPF protection for harsh Australian sun',
+        category: 'country_essential',
+        priority: 100,
+        countrySpecific: true
+      });
+      
+      // Local brand preference for better availability
+      if (userProfile.preferLocalBrands) {
+        const localBrandProducts = Object.entries(this.productDatabase)
+          .filter(([id, product]) => 
+            product.country === 'australia' &&
+            userProfile.countryData.localBrands.includes(product.brand)
+          )
+          .slice(0, 3);
+          
+        localBrandProducts.forEach(([productId, product]) => {
+          countryProducts.push({
+            productId,
+            reasoning: `Australian brand ${product.brand} - locally formulated and readily available`,
+            category: 'local_brand',
+            priority: 75,
+            countrySpecific: true
+          });
+        });
+      }
+    }
+    
+    return countryProducts;
+  }
   getClimateSpecificProducts(userProfile) {
     const climate = this.climateDatabase[userProfile.climate];
     if (!climate) return [];
@@ -1061,6 +1677,7 @@ class DynamicSkincareRecommendationEngine {
     const totalCost = allProducts.reduce((sum, rec) => sum + (rec.price || 0), 0);
     const productCount = allProducts.length;
     const averageCost = productCount > 0 ? Math.round(totalCost / productCount) : 0;
+    const currency = allProducts.length > 0 ? (allProducts[0].currency || 'INR') : 'INR';
 
     const categoryCosts = {};
     Object.keys(recommendations).forEach(category => {
@@ -1069,19 +1686,23 @@ class DynamicSkincareRecommendationEngine {
 
     return {
       total_cost: totalCost,
+      currency: currency,
       product_count: productCount,
       average_cost_per_product: averageCost,
       category_breakdown: categoryCosts,
-      budget_tips: this.getBudgetTips(totalCost),
+      budget_tips: this.getBudgetTips(totalCost, currency),
       cost_per_month: Math.round(totalCost / 3), // Assuming 3-month supply
-      value_assessment: this.assessValue(totalCost, productCount)
+      value_assessment: this.assessValue(totalCost, productCount, currency)
     };
   }
 
-  getBudgetTips(totalCost) {
+  getBudgetTips(totalCost, currency = 'INR') {
     const tips = [];
+    const currencySymbol = currency === 'AUD' ? '$' : '₹';
     
-    if (totalCost > 2000) {
+    const highCostThreshold = currency === 'AUD' ? 150 : 2000;
+    
+    if (totalCost > highCostThreshold) {
       tips.push('💡 Consider starting with essential products first, then adding treatments gradually');
       tips.push('🛒 Look for bundle deals or subscribe-and-save options');
     }
@@ -1090,17 +1711,27 @@ class DynamicSkincareRecommendationEngine {
     tips.push('🎯 Invest in quality basics (cleanser, moisturizer, sunscreen) before adding actives');
     tips.push('⚖️ Compare cost per ml/gram when choosing between similar products');
     
+    if (currency === 'AUD') {
+      tips.push('🇦🇺 Consider Australian brands for better availability and local climate formulation');
+      tips.push('🛍️ Shop at Chemist Warehouse or Priceline for better prices on international brands');
+    }
+    
     return tips;
   }
 
-  assessValue(totalCost, productCount) {
+  assessValue(totalCost, productCount, currency = 'INR') {
     const costPerProduct = totalCost / productCount;
+    const currencySymbol = currency === 'AUD' ? '$' : '₹';
     
-    if (costPerProduct < 400) {
+    const thresholds = currency === 'AUD' ? 
+      { excellent: 25, good: 50, premium: 100 } : 
+      { excellent: 400, good: 800, premium: 1500 };
+    
+    if (costPerProduct < thresholds.excellent) {
       return 'Excellent value - affordable products with good efficacy';
-    } else if (costPerProduct < 800) {
+    } else if (costPerProduct < thresholds.good) {
       return 'Good value - balanced quality and pricing';
-    } else if (costPerProduct < 1500) {
+    } else if (costPerProduct < thresholds.premium) {
       return 'Premium value - higher quality ingredients and formulations';
     } else {
       return 'Luxury value - top-tier products with advanced formulations';
@@ -1188,6 +1819,7 @@ class DynamicSkincareRecommendationEngine {
       gender: 'prefer_not_to_say',
       sensitivity: 5,
       climate: 'moderate',
+      country: 'india',
       budget: 'budget-friendly',
       experience: 'beginner',
       goals: ['hydrate_skin'],
@@ -1208,15 +1840,26 @@ class DynamicSkincareRecommendationEngine {
       // Safely normalize strings
       skinType: this.safeString(data.skinType) || 'normal',
       climate: this.safeString(data.climate) || 'moderate',
+      country: this.safeString(data.country) || 'india',
       budget: this.safeString(data.budget) || 'budget-friendly',
       experience: this.safeString(data.experience) || 'beginner',
       location: this.safeString(data.location) || ''
     };
 
-    // Auto-detect climate for Hyderabad
+    // Auto-detect climate and country based on location
     const location = normalized.location.toLowerCase();
     if (location.includes('hyderabad') || location.includes('hyd')) {
       normalized.climate = 'hot_humid';
+      normalized.country = 'india';
+    } else if (location.includes('melbourne') || location.includes('sydney') || location.includes('australia')) {
+      normalized.climate = 'temperate';
+      normalized.country = 'australia';
+    } else if (location.includes('brisbane') || location.includes('cairns') || location.includes('darwin')) {
+      normalized.climate = 'tropical';
+      normalized.country = 'australia';
+    } else if (location.includes('perth') || location.includes('adelaide')) {
+      normalized.climate = 'mediterranean';
+      normalized.country = 'australia';
     }
 
     return normalized;
@@ -1318,117 +1961,188 @@ class DynamicSkincareRecommendationEngine {
   }
 
   getCleanserOptions(userProfile) {
+    const country = userProfile.country || 'india';
     const budgetLimits = {
-      'budget-friendly': 500,
-      'mid-range': 1500,
-      'premium': 3000,
-      'luxury': 10000
+      'budget-friendly': userProfile.countryData?.budgetRanges?.['budget-friendly'] || 500,
+      'mid-range': userProfile.countryData?.budgetRanges?.['mid-range'] || 1500,
+      'premium': userProfile.countryData?.budgetRanges?.['premium'] || 3000,
+      'luxury': userProfile.countryData?.budgetRanges?.['luxury'] || 10000
     };
     const maxBudget = budgetLimits[userProfile.budget] || 500;
 
     const cleanserPriority = [];
 
-    // Budget-friendly options
-    if (maxBudget >= 199) {
-      if (userProfile.skinType === 'sensitive' || userProfile.sensitivity > 7) {
-        cleanserPriority.push('cetaphil_gentle_cleanser', 'simple_refreshing_cleanser');
-      } else if (userProfile.skinType === 'oily' || userProfile.concerns.includes('acne_breakouts')) {
-        cleanserPriority.push('neutrogena_oil_free_cleanser');
-      } else {
-        cleanserPriority.push('simple_refreshing_cleanser', 'cetaphil_gentle_cleanser');
+    // Country-specific cleanser recommendations
+    if (country === 'australia') {
+      // Budget-friendly Australian options
+      if (maxBudget >= 9.95) {
+        if (userProfile.skinType === 'sensitive' || userProfile.sensitivity > 7) {
+          cleanserPriority.push('qv_gentle_wash', 'cetaphil_gentle_cleanser_au');
+        } else if (userProfile.skinType === 'oily' || userProfile.concerns.includes('acne_breakouts')) {
+          cleanserPriority.push('benzac_daily_cleanser', 'sukin_foaming_cleanser');
+        } else {
+          cleanserPriority.push('sukin_foaming_cleanser', 'qv_gentle_wash');
+        }
       }
-    }
+      
+      // Mid-range Australian options
+      if (maxBudget >= 32.99) {
+        cleanserPriority.unshift('la_roche_posay_toleriane_au');
+        if (userProfile.skinType === 'normal' || userProfile.skinType === 'combination') {
+          cleanserPriority.unshift('aesop_purifying_cleanser');
+        }
+      }
+    } else {
+      // Indian options (existing logic)
+      if (maxBudget >= 199) {
+        if (userProfile.skinType === 'sensitive' || userProfile.sensitivity > 7) {
+          cleanserPriority.push('cetaphil_gentle_cleanser', 'simple_refreshing_cleanser');
+        } else if (userProfile.skinType === 'oily' || userProfile.concerns.includes('acne_breakouts')) {
+          cleanserPriority.push('neutrogena_oil_free_cleanser');
+        } else {
+          cleanserPriority.push('simple_refreshing_cleanser', 'cetaphil_gentle_cleanser');
+        }
+      }
 
-    // Mid-range options
-    if (maxBudget >= 990) {
-      cleanserPriority.unshift('cerave_foaming_cleanser');
-      if (userProfile.medicalConditions.includes('rosacea')) {
-        cleanserPriority.unshift('paula_choice_cleanser');
+      // Mid-range options
+      if (maxBudget >= 990) {
+        cleanserPriority.unshift('cerave_foaming_cleanser');
+        if (userProfile.medicalConditions.includes('rosacea')) {
+          cleanserPriority.unshift('paula_choice_cleanser');
+        }
       }
     }
 
     return cleanserPriority.filter(id => {
       const product = this.productDatabase[id];
-      return product && product.price <= maxBudget;
+      return product && product.price <= maxBudget && (!product.country || product.country === country);
     });
   }
 
   getMoisturizerOptions(userProfile) {
+    const country = userProfile.country || 'india';
     const budgetLimits = {
-      'budget-friendly': 500,
-      'mid-range': 1500,
-      'premium': 3000,
-      'luxury': 10000
+      'budget-friendly': userProfile.countryData?.budgetRanges?.['budget-friendly'] || 500,
+      'mid-range': userProfile.countryData?.budgetRanges?.['mid-range'] || 1500,
+      'premium': userProfile.countryData?.budgetRanges?.['premium'] || 3000,
+      'luxury': userProfile.countryData?.budgetRanges?.['luxury'] || 10000
     };
     const maxBudget = budgetLimits[userProfile.budget] || 500;
 
     const moisturizerPriority = [];
 
-    // Budget-friendly options
-    if (maxBudget >= 149) {
-      if (userProfile.skinType === 'dry' || userProfile.climate === 'cold') {
-        moisturizerPriority.push('nivea_soft_cream');
-      } else {
-        moisturizerPriority.push('ponds_super_light_gel');
+    if (country === 'australia') {
+      // Budget-friendly Australian options
+      if (maxBudget >= 8.99) {
+        if (userProfile.skinType === 'dry' || userProfile.climate === 'arid') {
+          moisturizerPriority.push('qv_cream');
+        } else {
+          moisturizerPriority.push('sukin_facial_moisturiser');
+        }
+        
+        // SPF moisturizer for Australian sun
+        if (maxBudget >= 19.95) {
+          moisturizerPriority.unshift('hamilton_everyday_face');
+        }
       }
-    }
+      
+      // Mid-range Australian options
+      if (maxBudget >= 45.00) {
+        moisturizerPriority.unshift('go_to_face_hero');
+        if (userProfile.skinType === 'dry' || userProfile.concerns.includes('dryness_dehydration')) {
+          moisturizerPriority.unshift('aspect_hydrating_serum');
+        }
+      }
 
-    // Mid-range options
-    if (maxBudget >= 699) {
-      if (userProfile.skinType === 'oily' || userProfile.climate === 'hot_humid') {
-        moisturizerPriority.unshift('neutrogena_hydra_boost');
-      } else {
-        moisturizerPriority.unshift('cerave_daily_moisturizer');
+    } else {
+      // Indian options (existing logic)
+      if (maxBudget >= 149) {
+        if (userProfile.skinType === 'dry' || userProfile.climate === 'cold') {
+          moisturizerPriority.push('nivea_soft_cream');
+        } else {
+          moisturizerPriority.push('ponds_super_light_gel');
+        }
+      }
+
+      // Mid-range options
+      if (maxBudget >= 699) {
+        if (userProfile.skinType === 'oily' || userProfile.climate === 'hot_humid') {
+          moisturizerPriority.unshift('neutrogena_hydra_boost');
+        } else {
+          moisturizerPriority.unshift('cerave_daily_moisturizer');
+        }
       }
     }
 
     return moisturizerPriority.filter(id => {
       const product = this.productDatabase[id];
-      return product && product.price <= maxBudget;
+      return product && product.price <= maxBudget && (!product.country || product.country === country);
     });
   }
 
   getSunscreenOptions(userProfile) {
+    const country = userProfile.country || 'india';
     const budgetLimits = {
-      'budget-friendly': 500,
-      'mid-range': 1500,
-      'premium': 3000,
-      'luxury': 10000
+      'budget-friendly': userProfile.countryData?.budgetRanges?.['budget-friendly'] || 500,
+      'mid-range': userProfile.countryData?.budgetRanges?.['mid-range'] || 1500,
+      'premium': userProfile.countryData?.budgetRanges?.['premium'] || 3000,
+      'luxury': userProfile.countryData?.budgetRanges?.['luxury'] || 10000
     };
     const maxBudget = budgetLimits[userProfile.budget] || 500;
 
     const sunscreenPriority = [];
 
-    // Budget-friendly options
-    if (maxBudget >= 299) {
-      sunscreenPriority.push('lakme_sunscreen');
-      if (maxBudget >= 449) {
-        sunscreenPriority.unshift('neutrogena_ultra_sheer');
+    if (country === 'australia') {
+      // Budget-friendly Australian options (SPF 50+ essential)
+      if (maxBudget >= 14.95) {
+        sunscreenPriority.push('cancer_council_face_day_wear');
+        if (maxBudget >= 19.95) {
+          sunscreenPriority.unshift('hamilton_face_sunscreen');
+        }
       }
-    }
+      
+      // Mid-range Australian options
+      if (maxBudget >= 29.95) {
+        if (userProfile.skinType === 'sensitive' || userProfile.medicalConditions.includes('rosacea')) {
+          sunscreenPriority.unshift('invisible_zinc_face_fluid');
+        }
+        if (maxBudget >= 42.00) {
+          sunscreenPriority.unshift('ultra_violette_supreme_screen');
+        }
+      }
+    } else {
+      // Indian options (existing logic)
+      if (maxBudget >= 299) {
+        sunscreenPriority.push('lakme_sunscreen');
+        if (maxBudget >= 449) {
+          sunscreenPriority.unshift('neutrogena_ultra_sheer');
+        }
+      }
 
-    // Mid-range options
-    if (maxBudget >= 899) {
-      sunscreenPriority.unshift('la_roche_posay_sunscreen');
-      if (userProfile.sensitivity > 7 || userProfile.medicalConditions.includes('rosacea')) {
-        sunscreenPriority.unshift('eltamd_sunscreen');
+      // Mid-range options
+      if (maxBudget >= 899) {
+        sunscreenPriority.unshift('la_roche_posay_sunscreen');
+        if (userProfile.sensitivity > 7 || userProfile.medicalConditions.includes('rosacea')) {
+          sunscreenPriority.unshift('eltamd_sunscreen');
+        }
       }
     }
 
     return sunscreenPriority.filter(id => {
       const product = this.productDatabase[id];
-      return product && product.price <= maxBudget;
+      return product && product.price <= maxBudget && (!product.country || product.country === country);
     });
   }
 
   // ============ CONCERN-BASED PRODUCTS ============
   getConcernBasedProducts(userProfile) {
     const concernProducts = [];
+    const country = userProfile.country || 'india';
     const budgetLimits = {
-      'budget-friendly': 500,
-      'mid-range': 1500,
-      'premium': 3000,
-      'luxury': 10000
+      'budget-friendly': userProfile.countryData?.budgetRanges?.['budget-friendly'] || 500,
+      'mid-range': userProfile.countryData?.budgetRanges?.['mid-range'] || 1500,
+      'premium': userProfile.countryData?.budgetRanges?.['premium'] || 3000,
+      'luxury': userProfile.countryData?.budgetRanges?.['luxury'] || 10000
     };
     const maxBudget = budgetLimits[userProfile.budget] || 500;
     
@@ -1437,20 +2151,44 @@ class DynamicSkincareRecommendationEngine {
       
       switch(concern) {
         case 'acne_breakouts':
-          // Always recommend niacinamide for acne
-          if (maxBudget >= 349) {
-            concernProducts.push({
-              productId: 'minimalist_niacinamide',
-              reasoning: 'Controls oil production and reduces acne inflammation',
-              category: 'targeted',
-              priority: priority
-            });
+          if (country === 'australia') {
+            // Australian acne products
+            if (maxBudget >= 9.90) {
+              concernProducts.push({
+                productId: 'the_ordinary_niacinamide_au',
+                reasoning: 'Controls oil production and reduces acne inflammation',
+                category: 'targeted',
+                priority: priority
+              });
+            }
+            
+            if (userProfile.experience !== 'beginner' && maxBudget >= 19.99) {
+              concernProducts.push({
+                productId: 'benzac_spot_treatment',
+                reasoning: 'Targeted acne treatment with benzoyl peroxide',
+                category: 'targeted',
+                priority: priority - 5
+              });
+            }
+          } else {
+            // Indian acne products (existing logic)
+            if (maxBudget >= 349) {
+              concernProducts.push({
+                productId: 'minimalist_niacinamide',
+                reasoning: 'Controls oil production and reduces acne inflammation',
+                category: 'targeted',
+                priority: priority
+              });
+            }
           }
           
-          // Add BHA for intermediate+ users
-          if (userProfile.experience !== 'beginner' && maxBudget >= 1299) {
+          // BHA for intermediate+ users (both countries)
+          const bhaProduct = country === 'australia' ? 'paula_choice_bha_au' : 'paula_choice_bha';
+          const bhaPrice = country === 'australia' ? 49.00 : 1299;
+          
+          if (userProfile.experience !== 'beginner' && maxBudget >= bhaPrice) {
             concernProducts.push({
-              productId: 'paula_choice_bha',
+              productId: bhaProduct,
               reasoning: 'Unclogs pores and prevents new breakouts',
               category: 'targeted',
               priority: priority - 5
@@ -1459,42 +2197,74 @@ class DynamicSkincareRecommendationEngine {
           break;
           
         case 'fine_lines_wrinkles':
-          // Vitamin C for anti-aging
-          if (maxBudget >= 899) {
-            concernProducts.push({
-              productId: 'cosrx_vitamin_c',
-              reasoning: 'Antioxidant protection and collagen support',
-              category: 'targeted',
-              priority: priority
-            });
-          }
-          
-          // Retinol for advanced users
-          if (userProfile.experience === 'advanced' && maxBudget >= 2800 && userProfile.age > 25) {
-            concernProducts.push({
-              productId: 'skinceuticals_retinol',
-              reasoning: 'Gold standard for anti-aging and skin renewal',
-              category: 'targeted',
-              priority: priority + 5
-            });
+          if (country === 'australia') {
+            // Australian anti-aging products
+            if (maxBudget >= 89.00) {
+              concernProducts.push({
+                productId: 'aspect_vitamin_c',
+                reasoning: 'Australian dermatologist-formulated vitamin C for anti-aging',
+                category: 'targeted',
+                priority: priority
+              });
+            }
+            
+            if (userProfile.experience === 'advanced' && maxBudget >= 180.00 && userProfile.age > 25) {
+              concernProducts.push({
+                productId: 'rationale_retinol',
+                reasoning: 'Premium Australian retinol for advanced anti-aging',
+                category: 'targeted',
+                priority: priority + 5
+              });
+            }
+          } else {
+            // Indian anti-aging products (existing logic)
+            if (maxBudget >= 899) {
+              concernProducts.push({
+                productId: 'cosrx_vitamin_c',
+                reasoning: 'Antioxidant protection and collagen support',
+                category: 'targeted',
+                priority: priority
+              });
+            }
           }
           break;
           
         case 'dark_spots_hyperpigmentation':
-          if (maxBudget >= 899) {
-            concernProducts.push({
-              productId: 'cosrx_vitamin_c',
-              reasoning: 'Brightens skin tone and fades dark spots',
-              category: 'targeted',
-              priority: priority
-            });
+          if (country === 'australia') {
+            if (maxBudget >= 125.00) {
+              concernProducts.push({
+                productId: 'synergie_vitamin_c',
+                reasoning: 'High-strength vitamin C for brightening and spot reduction',
+                category: 'targeted',
+                priority: priority
+              });
+            } else if (maxBudget >= 89.00) {
+              concernProducts.push({
+                productId: 'aspect_vitamin_c',
+                reasoning: 'Clinical-grade vitamin C for pigmentation',
+                category: 'targeted',
+                priority: priority
+              });
+            }
+          } else {
+            if (maxBudget >= 899) {
+              concernProducts.push({
+                productId: 'cosrx_vitamin_c',
+                reasoning: 'Brightens skin tone and fades dark spots',
+                category: 'targeted',
+                priority: priority
+              });
+            }
           }
           break;
           
         case 'dryness_dehydration':
-          if (maxBudget >= 490) {
+          const hyaluronicProduct = country === 'australia' ? 'the_ordinary_hyaluronic_au' : 'the_ordinary_hyaluronic_acid';
+          const hyaluronicPrice = country === 'australia' ? 9.90 : 490;
+          
+          if (maxBudget >= hyaluronicPrice) {
             concernProducts.push({
-              productId: 'the_ordinary_hyaluronic_acid',
+              productId: hyaluronicProduct,
               reasoning: 'Intense hydration and moisture retention',
               category: 'targeted',
               priority: priority
@@ -1504,12 +2274,45 @@ class DynamicSkincareRecommendationEngine {
           
         case 'excess_oil_shine':
         case 'large_pores':
-          if (maxBudget >= 349) {
+          if (country === 'australia') {
+            if (maxBudget >= 9.90) {
+              concernProducts.push({
+                productId: 'the_ordinary_niacinamide_au',
+                reasoning: 'Controls sebum production and minimizes pore appearance',
+                category: 'targeted',
+                priority: priority
+              });
+            }
+            
+            // Premium niacinamide for better results
+            if (maxBudget >= 95.00) {
+              concernProducts.push({
+                productId: 'synergie_vitamin_b',
+                reasoning: 'High-strength niacinamide for superior oil control',
+                category: 'targeted',
+                priority: priority + 5
+              });
+            }
+          } else {
+            if (maxBudget >= 349) {
+              concernProducts.push({
+                productId: 'minimalist_niacinamide',
+                reasoning: 'Controls sebum production and minimizes pore appearance',
+                category: 'targeted',
+                priority: priority
+              });
+            }
+          }
+          break;
+          
+        case 'sun_protection':
+          // Critical in Australia
+          if (country === 'australia') {
             concernProducts.push({
-              productId: 'minimalist_niacinamide',
-              reasoning: 'Controls sebum production and minimizes pore appearance',
+              productId: 'cancer_council_face_day_wear',
+              reasoning: 'Essential SPF 50+ protection for Australian conditions',
               category: 'targeted',
-              priority: priority
+              priority: 100 // Highest priority in Australia
             });
           }
           break;
@@ -1926,28 +2729,47 @@ class DynamicSkincareRecommendationEngine {
     
     const skinType = assessmentData.skinType || 'normal';
     const budget = assessmentData.budget || 'budget-friendly';
+    const country = assessmentData.country || 'india';
     
     const fallbackProducts = {
-      'budget-friendly': {
-        'oily': ['simple_refreshing_cleanser', 'minimalist_niacinamide', 'ponds_super_light_gel', 'neutrogena_ultra_sheer'],
-        'dry': ['cetaphil_gentle_cleanser', 'the_ordinary_hyaluronic_acid', 'nivea_soft_cream', 'neutrogena_ultra_sheer'],
-        'sensitive': ['cetaphil_gentle_cleanser', 'nivea_soft_cream', 'neutrogena_ultra_sheer'],
-        'default': ['simple_refreshing_cleanser', 'ponds_super_light_gel', 'lakme_sunscreen']
+      'australia': {
+        'budget-friendly': {
+          'oily': ['sukin_foaming_cleanser', 'the_ordinary_niacinamide_au', 'sukin_facial_moisturiser', 'cancer_council_face_day_wear'],
+          'dry': ['qv_gentle_wash', 'the_ordinary_hyaluronic_au', 'qv_cream', 'hamilton_face_sunscreen'],
+          'sensitive': ['qv_gentle_wash', 'qv_cream', 'invisible_zinc_face_fluid'],
+          'default': ['sukin_foaming_cleanser', 'sukin_facial_moisturiser', 'cancer_council_face_day_wear']
+        },
+        'mid-range': {
+          'oily': ['benzac_daily_cleanser', 'the_ordinary_niacinamide_au', 'go_to_face_hero', 'ultra_violette_supreme_screen'],
+          'dry': ['la_roche_posay_toleriane_au', 'aspect_hydrating_serum', 'cerave_daily_moisturizer_au', 'hamilton_face_sunscreen'],
+          'sensitive': ['cetaphil_gentle_cleanser_au', 'cerave_daily_moisturizer_au', 'invisible_zinc_face_fluid'],
+          'default': ['la_roche_posay_toleriane_au', 'go_to_face_hero', 'ultra_violette_supreme_screen']
+        }
       },
-      'mid-range': {
-        'oily': ['cerave_foaming_cleanser', 'minimalist_niacinamide', 'neutrogena_hydra_boost', 'la_roche_posay_sunscreen'],
-        'dry': ['cerave_foaming_cleanser', 'the_ordinary_hyaluronic_acid', 'cerave_daily_moisturizer', 'la_roche_posay_sunscreen'],
-        'sensitive': ['cerave_foaming_cleanser', 'cerave_daily_moisturizer', 'la_roche_posay_sunscreen'],
-        'default': ['cerave_foaming_cleanser', 'neutrogena_hydra_boost', 'la_roche_posay_sunscreen']
+      'india': {
+        'budget-friendly': {
+          'oily': ['simple_refreshing_cleanser', 'minimalist_niacinamide', 'ponds_super_light_gel', 'neutrogena_ultra_sheer'],
+          'dry': ['cetaphil_gentle_cleanser', 'the_ordinary_hyaluronic_acid', 'nivea_soft_cream', 'neutrogena_ultra_sheer'],
+          'sensitive': ['cetaphil_gentle_cleanser', 'nivea_soft_cream', 'neutrogena_ultra_sheer'],
+          'default': ['simple_refreshing_cleanser', 'ponds_super_light_gel', 'lakme_sunscreen']
+        },
+        'mid-range': {
+          'oily': ['cerave_foaming_cleanser', 'minimalist_niacinamide', 'neutrogena_hydra_boost', 'la_roche_posay_sunscreen'],
+          'dry': ['cerave_foaming_cleanser', 'the_ordinary_hyaluronic_acid', 'cerave_daily_moisturizer', 'la_roche_posay_sunscreen'],
+          'sensitive': ['cerave_foaming_cleanser', 'cerave_daily_moisturizer', 'la_roche_posay_sunscreen'],
+          'default': ['cerave_foaming_cleanser', 'neutrogena_hydra_boost', 'la_roche_posay_sunscreen']
+        }
       }
     };
 
-    const products = fallbackProducts[budget]?.[skinType] || fallbackProducts[budget]?.['default'] || fallbackProducts['budget-friendly']['default'];
+    const countryFallbacks = fallbackProducts[country] || fallbackProducts['india'];
+    const products = countryFallbacks[budget]?.[skinType] || countryFallbacks[budget]?.['default'] || countryFallbacks['budget-friendly']['default'];
 
     return {
       user_profile: { 
         skinType,
         budget,
+        country,
         fallback: true,
         error: 'Algorithm failed, using fallback recommendations'
       },
@@ -1960,6 +2782,7 @@ class DynamicSkincareRecommendationEngine {
             product_name: product?.name || 'Unknown Product',
             brand: product?.brand || 'Unknown',
             price: product?.price || 0,
+            currency: product?.currency || 'INR',
             reasoning: 'Safe fallback recommendation for your skin type',
             category: 'essential',
             matchScore: 70,
@@ -1984,6 +2807,7 @@ class DynamicSkincareRecommendationEngine {
           const product = this.productDatabase[productId];
           return sum + (product?.price || 0);
         }, 0)
+        currency: products.length > 0 ? (this.productDatabase[products[0]]?.currency || 'INR') : 'INR'
       }
     };
   }

@@ -90,15 +90,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           'Expert'
         );
         break;
-      case 'skinSensitivity':
-        setSliderLabel(
-          value === 1 ? 'Not Sensitive' :
-          value === 2 ? 'Slightly Sensitive' :
-          value === 3 ? 'Moderately Sensitive' :
-          value === 4 ? 'Very Sensitive' :
-          'Extremely Sensitive'
-        );
-        break;
       case 'oiliness':
         setSliderLabel(
           value === 1 ? 'Very Dry' :

@@ -6,7 +6,6 @@ import ProgressSteps from '../components/common/ProgressSteps';
 import QuestionCard, { AnswerType } from '../components/assessment/QuestionCard';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
-import DynamicSkincareRecommendationEngine from '../lib/dynamicRecommendationEngine';
 
 // Complete 13-question assessment
 const questions = [
@@ -241,13 +240,24 @@ const AssessmentPage: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      // Generate enhanced recommendations using the dynamic engine
-      const engine = new DynamicSkincareRecommendationEngine();
-      const enhancedRecommendations = await engine.generateRecommendations(
-        user?.id || 'anonymous',
-        assessmentData
-      );
-      
+      // Generate basic recommendations (enhanced engine temporarily disabled)
+      const enhancedRecommendations = {
+        recommendations: {
+          essential: [],
+          targeted: []
+        },
+        budget_summary: {
+          total_cost: 0,
+          product_count: 0,
+          cost_per_month: 0
+        },
+        routine_suggestions: {
+          morning: ['Cleanser', 'Moisturizer', 'Sunscreen'],
+          evening: ['Cleanser', 'Treatment', 'Moisturizer']
+        },
+        warnings: []
+      };
+
       setRecommendations(enhancedRecommendations);
       
       // Save to database if user is authenticated

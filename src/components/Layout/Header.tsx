@@ -33,7 +33,7 @@ const Header: React.FC<HeaderProps> = ({ transparent = false }) => {
 
   const navLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Skin Assessment', path: '/assessment' },
+    { name: '🇦🇺 Skin Assessment', path: '/assessment' },
     { name: 'Ingredient Analysis', path: '/ingredients' },
     { name: 'Routine Builder', path: '/routine' },
     { name: 'About', path: '/about' },

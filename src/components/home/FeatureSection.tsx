@@ -61,7 +61,7 @@ const FeatureSection: React.FC = () => {
     {
       icon: <Calendar size={32} className="text-success-500" />,
       title: "Customized Routines",
-      description: "Create morning and evening skincare routines tailored to your skin type, concerns, and local climate.",
+      description: "Create morning and evening skincare routines tailored for Australian climates with locally available products.",
       gradient: "from-success-500 to-success-600"
     },
     {
@@ -83,10 +83,10 @@ const FeatureSection: React.FC = () => {
           viewport={{ once: true }}
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-neutral-800 to-neutral-600 bg-clip-text text-transparent">
-            Smart Solutions for Healthier Skin
+            Smart Solutions for Healthier Skin 🇦🇺
           </h2>
           <p className="text-lg text-neutral-600">
-            Ingrevo combines artificial intelligence with dermatological expertise to simplify skincare choices for Indian consumers.
+            Australian-focused skincare recommendations with local products from Cancer Council, Sukin, QV & more. Built for Aussie skin & climate!
           </p>
         </motion.div>
 

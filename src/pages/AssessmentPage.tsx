@@ -588,43 +588,47 @@ const AssessmentPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-primary-50/30 to-accent-50/30 pt-24 pb-16 px-4">
-      <div className="container mx-auto">
-        {!showResults ? (
-          <>
-            <div className="text-center max-w-3xl mx-auto mb-10">
-              <motion.h1 
-                className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                Complete Skin Assessment
-              </motion.h1>
-              <motion.p 
-                className="text-neutral-600 text-lg"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-              >
-                Answer 13 comprehensive questions to get personalized skincare recommendations
-              </motion.p>
-            </div>
-            
-            <div className="max-w-4xl mx-auto mb-10">
-              <ProgressSteps 
-                steps={steps} 
-                currentStep={currentStep}
-              />
-            </div>
-            
-            {renderQuestion()}
-          </>
-        ) : (
-          renderResults()
-        )}
+    <>
+      {showCelebration && <CelebrationScreen onComplete={handleCelebrationComplete} />}
+
+      <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-primary-50/30 to-accent-50/30 pt-24 pb-16 px-4">
+        <div className="container mx-auto">
+          {!showResults ? (
+            <>
+              <div className="text-center max-w-3xl mx-auto mb-10">
+                <motion.h1
+                  className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  Complete Skin Assessment 🇦🇺
+                </motion.h1>
+                <motion.p
+                  className="text-neutral-600 text-lg"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                >
+                  Answer 13 questions to get personalized Australian skincare recommendations
+                </motion.p>
+              </div>
+
+              <div className="max-w-4xl mx-auto mb-10">
+                <ProgressSteps
+                  steps={steps}
+                  currentStep={currentStep}
+                />
+              </div>
+
+              {renderQuestion()}
+            </>
+          ) : (
+            renderResults()
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
